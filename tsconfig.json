@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    /* Standards */
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+
+    /* Build Output (For Types Only) */
+    "declaration": true,
+    "rootDir": "./src",
+
+    /* Strictness & Interop */
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Optimization for esbuild */
+    "isolatedModules": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["./gamemaker-config"]
+}

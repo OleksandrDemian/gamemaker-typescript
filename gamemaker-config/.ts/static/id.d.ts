@@ -1,0 +1,40 @@
+declare namespace Id {
+  type Sound = any;
+  type AudioListener = any;
+  interface Instance extends GmInstance {}
+  type Layer = any;
+  type DsList = any;
+  type AudioEmitter = any;
+  type Buffer = any;
+  type DsPriority = any;
+  type DsMap = any;
+  type DsQueue = any;
+  type DsStack = any;
+  type Sampler = any;
+  type Uniform = any;
+  type ParticleEmitter = any;
+  type ParticleSystem = any;
+  type ParticleType = any;
+  type AudioSyncGroup = any;
+  type Camera = any;
+  type BackgroundElement = any;
+  type SequenceElement = any;
+  type SpriteElement = any;
+  type TileMapElement = any;
+  type Surface = any;
+  type Texture = any;
+  type VertexBuffer = any;
+  type Gif = any;
+  type DsGrid = any;
+  type VertexFormat = any;
+  type BinaryFile = any;
+  type TextFile = any;
+  type MpGrid = any;
+  type Socket = any;
+  type ExternalCall = any;
+  type PhysicsIndex = any;
+  type PhysicsParticleGroup = any;
+  type TileElementId = any;
+  type EmitterIndex = any;
+  type TimeSource = any;
+}

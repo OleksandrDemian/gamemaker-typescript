@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "noLib": true,
+    "skipLibCheck": true,
+    "rootDir": ".",
+    "typeRoots": [
+      ".ts"
+    ]
+  }
+}

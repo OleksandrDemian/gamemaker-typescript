@@ -1,14 +1,32 @@
 {
-  "name": "gamemaker-typescript",
-  "version": "1.0.0",
+  "name": "@odemian/gamemaker-typescript",
+  "version": "0.0.0",
   "main": "index.js",
   "license": "MIT",
+  "bin": {
+    "gmts": "bin/lib.js",
+    "gamemaker-typescript": "bin/lib.js"
+  },
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "files": [
+    "bin/",
+    "gamemaker-config/",
+    "package.json",
+    "yarn.lock",
+    "tsconfig.json"
+  ],
   "dependencies": {
-    "@types/typescript": "^2.0.0",
+    "@types/fs-extra": "^11.0.4",
     "chokidar": "^5.0.0",
+    "fs-extra": "^11.3.4",
+    "json5": "^2.2.3",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0"
+    "@types/node": "^25.5.0",
+    "@types/typescript": "^2.0.0",
+    "esbuild": "^0.27.4"
   }
 }
