@@ -1,17 +1,19 @@
 import chokidar from "chokidar";
 import fs from "fs-extra";
 import {processFile} from "./processor";
+import {setupTsProject} from "./setup";
+import path from "node:path";
 
 const compile = () => {
   console.log("Compiling TS project");
-  fs.readdir(
-    "./", { recursive: true, encoding: "utf8" },
-    (error, result) => {
-      for (const file of result) {
-        processFile(file);
-      }
-    },
-  );
+  console.time("Compile project");
+  const result = fs.readdirSync(process.cwd(), { recursive: true, encoding: "utf8" });
+
+  for (const file of result) {
+    processFile(file);
+  }
+
+  console.timeEnd("Compile project");
 };
 
 const watch = () => {
@@ -19,7 +21,7 @@ const watch = () => {
   console.log("Watching for files");
   chokidar
     .watch("./", {
-      ignoreInitial: true,
+      // ignoreInitial: true, skip files when starting the service
       /// todo: ignore useless files
     })
     .on("add", processFile)
@@ -30,10 +32,19 @@ const health = () => {
   console.log("Looks healthy");
 };
 
-const [command = "compile"] = process.argv.slice(2);
+const setup = (force: string = "false") => {
+  setupTsProject({
+    currentFolder: process.cwd(),
+    assetsFolder: path.join(__dirname, "..", "gamemaker-config"),
+    forceSetup: force === "true",
+  });
+};
+
+const [command = "compile", ...rest] = process.argv.slice(2);
 
 switch (command) {
   case "compile": compile(); break;
   case "watch": watch(); break;
   case "health": health(); break;
+  case "setup": setup(rest[0]); break;
 }

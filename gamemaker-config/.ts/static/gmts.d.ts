@@ -1,65 +1,65 @@
-declare function variables<T>(): T;
+declare function defineObject <T> (): T;
 
-declare interface VoidFunction {
-  (): void;
+declare interface TypedCallback <T> {
+  (this: T): void;
 }
 
 // --- Main & Cleanup ---
-declare function onCreate(fn: VoidFunction): void;
-declare function onDestroy(fn: VoidFunction): void;
-declare function onCleanUp(fn: VoidFunction): void;
-declare function onRoomStart(fn: VoidFunction): void;
-declare function onRoomEnd(fn: VoidFunction): void;
-declare function onGameEnd(fn: VoidFunction): void;
+declare function onCreate<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onDestroy<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onCleanUp<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onRoomStart<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onRoomEnd<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onGameEnd<T>(obj: T, fn: TypedCallback<T>): void;
 
 // --- Step ---
-declare function onBeginStep(fn: VoidFunction): void;
-declare function onStep(fn: VoidFunction): void;
-declare function onEndStep(fn: VoidFunction): void;
+declare function onBeginStep<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onStep<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onEndStep<T>(obj: T, fn: TypedCallback<T>): void;
 
 // --- Draw ---
-declare function onPreDraw(fn: VoidFunction): void;
-declare function onDrawBegin(fn: VoidFunction): void;
-declare function onDraw(fn: VoidFunction): void;
-declare function onDrawEnd(fn: VoidFunction): void;
-declare function onPostDraw(fn: VoidFunction): void;
+declare function onPreDraw<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onDrawBegin<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onDraw<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onDrawEnd<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onPostDraw<T>(obj: T, fn: TypedCallback<T>): void;
 
 // --- Draw GUI ---
-declare function onDrawGuiBegin(fn: VoidFunction): void;
-declare function onDrawGui(fn: VoidFunction): void;
-declare function onDrawGuiEnd(fn: VoidFunction): void;
+declare function onDrawGuiBegin<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onDrawGui<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onDrawGuiEnd<T>(obj: T, fn: TypedCallback<T>): void;
 
 // --- Async & Other ---
-declare function onAnimationUpdate(fn: VoidFunction): void;
-declare function onAnimationEvent(fn: VoidFunction): void;
-declare function onAsyncImageLoaded(fn: VoidFunction): void;
-declare function onAsyncHttp(fn: VoidFunction): void;
-declare function onAsyncSystem(fn: VoidFunction): void;
-declare function onAsyncSocial(fn: VoidFunction): void;
-declare function onAsyncSaveLoad(fn: VoidFunction): void;
-declare function onAsyncSteam(fn: VoidFunction): void;
-declare function onAsyncDialog(fn: VoidFunction): void;
-declare function onBroadcastMessage(fn: VoidFunction): void;
+declare function onAnimationUpdate<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onAnimationEvent<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onAsyncImageLoaded<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onAsyncHttp<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onAsyncSystem<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onAsyncSocial<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onAsyncSaveLoad<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onAsyncSteam<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onAsyncDialog<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onBroadcastMessage<T>(obj: T, fn: TypedCallback<T>): void;
 
 // --- Input ---
-declare function onGlobalLeftReleased(fn: VoidFunction): void;
-declare function onGlobalRightReleased(fn: VoidFunction): void;
-declare function onGlobalMiddleReleased(fn: VoidFunction): void;
+declare function onGlobalLeftReleased<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onGlobalRightReleased<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onGlobalMiddleReleased<T>(obj: T, fn: TypedCallback<T>): void;
 
 // --- User Events (0-15) ---
-declare function onUserEvent0(fn: VoidFunction): void;
-declare function onUserEvent1(fn: VoidFunction): void;
-declare function onUserEvent2(fn: VoidFunction): void;
-declare function onUserEvent3(fn: VoidFunction): void;
-declare function onUserEvent4(fn: VoidFunction): void;
-declare function onUserEvent5(fn: VoidFunction): void;
-declare function onUserEvent6(fn: VoidFunction): void;
-declare function onUserEvent7(fn: VoidFunction): void;
-declare function onUserEvent8(fn: VoidFunction): void;
-declare function onUserEvent9(fn: VoidFunction): void;
-declare function onUserEvent10(fn: VoidFunction): void;
-declare function onUserEvent11(fn: VoidFunction): void;
-declare function onUserEvent12(fn: VoidFunction): void;
-declare function onUserEvent13(fn: VoidFunction): void;
-declare function onUserEvent14(fn: VoidFunction): void;
-declare function onUserEvent15(fn: VoidFunction): void;
+declare function onUserEvent0<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent1<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent2<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent3<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent4<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent5<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent6<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent7<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent8<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent9<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent10<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent11<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent12<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent13<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent14<T>(obj: T, fn: TypedCallback<T>): void;
+declare function onUserEvent15<T>(obj: T, fn: TypedCallback<T>): void;

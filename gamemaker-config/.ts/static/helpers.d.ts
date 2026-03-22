@@ -1,5 +1,5 @@
 declare type Real = number;
-declare type Bool = boolean;
+declare type Bool = 0 | 1;
 declare type String = string;
 declare type Any = any;
 declare type Undefined = undefined;

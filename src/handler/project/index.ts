@@ -1,5 +1,5 @@
 import fs from "fs-extra";
-import {createProjectFolder, IProject} from "../../entities/project";
+import {createProjectFolder, IProject, IProjectResource} from "../../entities/project";
 import js5 from "json5";
 import {createObjectHandler} from "../object";
 import {createScriptHandler} from "../script";
@@ -95,6 +95,10 @@ export const createProjectHandler = () => {
 
     getScriptHandler: (name: string) => {
       return createScriptHandler(name);
-    }
+    },
+
+    iterateResources: (cb: (res: IProjectResource) => void) => {
+      project.resources.forEach(cb);
+    },
   };
 };

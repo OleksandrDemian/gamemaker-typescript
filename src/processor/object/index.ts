@@ -6,6 +6,7 @@ import {objectEvents} from "../../events";
 import {createObjectEvent} from "../../entities/objectEvent";
 import {createObject, IObject} from "../../entities/object";
 import {DEFAULT_OBJECT_FOLDER} from "../../const";
+import {transpileObjectConfig} from "../../config/transpiler";
 
 const trim = (str: string): string => {
   return str.trim();
@@ -14,13 +15,15 @@ const trim = (str: string): string => {
 const createObjectInfoCollector = () => {
   const info: any = {};
   const sandbox: any = {
-    variables: () => ({}),
+    defineObject: () => ({}),
   };
 
   for (const { handler } of objectEvents) {
-    sandbox[handler] = function (fn: () => void) {
+    sandbox[handler] = function (value: any, fn: () => void) {
       const lines = fn.toString().split("\n");
-      info[handler] = lines.slice(1, lines.length - 1).map(trim).join("\n");
+      if (lines.length > 2) {
+        info[handler] = lines.slice(1, lines.length - 1).map(trim).join("\n");
+      }
     };
   }
 
@@ -38,13 +41,7 @@ export interface IProcessedObjectFile {
 export const processObjectFile = (filePath: string): IProcessedObjectFile => {
   const source = fs.readFileSync(filePath, "utf-8");
 
-  const result = ts.transpileModule(source, {
-    compilerOptions: {
-      target: ts.ScriptTarget.ES5,
-      module: ts.ModuleKind.CommonJS,
-      useDefineForClassFields: false,
-    },
-  });
+  const result = ts.transpileModule(source, transpileObjectConfig);
 
   const script = new vm.Script(result.outputText);
   const collector = createObjectInfoCollector();

@@ -1,6 +1,6 @@
 import ts from "typescript";
 import fs from "fs-extra";
-import {transpileOptions} from "../../config/transpiler";
+import {transpileScriptConfig} from "../../config/transpiler";
 import path from "node:path";
 import {createScript, IScript} from "../../entities/script";
 import {DEFAULT_SCRIPT_FOLDER} from "../../const";
@@ -14,7 +14,7 @@ export const processScriptFile = (filePath: string) : IProcessScriptFile=> {
   const source = fs.readFileSync(filePath, "utf-8");
 
   const fileName = path.parse(filePath).name;
-  const result = ts.transpileModule(source, transpileOptions);
+  const result = ts.transpileModule(source, transpileScriptConfig);
 
   return {
     script: createScript({
