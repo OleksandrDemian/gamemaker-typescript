@@ -61,7 +61,7 @@ jobs:
           else
             TAG="${{ inputs.tag }}"
             echo "Setting npm version to ${{ inputs.npm_version }}"
-            npm version "${{ inputs.npm_version }}" --no-git-tag-version
+            npm version "${{ inputs.npm_version }}" --no-git-tag-version --allow-same-version
           fi
           
           echo "tag=$TAG" >> $GITHUB_OUTPUT
