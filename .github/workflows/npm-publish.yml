@@ -54,7 +54,6 @@ jobs:
 
       - name: Determine tag and set NPM version
         id: release-meta
-        working-directory: cli-dist
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             TAG="prod"
