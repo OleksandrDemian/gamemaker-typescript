@@ -1,0 +1,78 @@
+name: NPM Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Publish tag (prod or beta)'
+        required: true
+        type: choice
+        options:
+          - prod
+          - beta
+      npm_version:
+        description: 'NPM version to publish (e.g. 1.2.3 or 1.2.3-beta.1)'
+        required: true
+        type: string
+
+  push:
+    tags:
+      - 'v*'
+
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      npm_version:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write   # REQUIRED for npm Trusted Publishing
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build CLI
+        run: yarn build
+
+      - name: Determine tag and set NPM version
+        id: release-meta
+        working-directory: cli-dist
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG="prod"
+            echo "Push event detected, skipping npm version set"
+          else
+            TAG="${{ inputs.tag }}"
+            echo "Setting npm version to ${{ inputs.npm_version }}"
+            npm version "${{ inputs.npm_version }}" --no-git-tag-version
+          fi
+          
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Publish to npm
+        env:
+          NPM_CONFIG_PROVENANCE: true
+        run: |
+          if [ "${{ steps.release-meta.outputs.tag }}" = "beta" ]; then
+            npm publish --tag beta --access public
+          else
+            npm publish --access public
+          fi
