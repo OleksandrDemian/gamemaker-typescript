@@ -15,17 +15,19 @@ const trim = (str: string): string => {
 const createObjectInfoCollector = () => {
   const info: any = {};
   const sandbox: any = {
-    defineObject: () => ({}),
-  };
+    defineObject: (schema: any) => {
+      if (!schema) return;
 
-  for (const { handler } of objectEvents) {
-    sandbox[handler] = function (value: any, fn: () => void) {
-      const lines = fn.toString().split("\n");
-      if (lines.length > 2) {
-        info[handler] = lines.slice(1, lines.length - 1).map(trim).join("\n");
+      for (const { handler } of objectEvents) {
+        if (schema[handler]) {
+          const lines = schema[handler].toString().split("\n");
+          if (lines.length > 2) {
+            info[handler] = lines.slice(1, lines.length - 1).map(trim).join("\n");
+          }
+        }
       }
-    };
-  }
+    },
+  };
 
   return {
     getSandbox: () => sandbox,

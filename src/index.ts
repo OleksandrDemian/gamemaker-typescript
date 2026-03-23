@@ -35,7 +35,7 @@ const health = () => {
 const setup = (force: string = "false") => {
   setupTsProject({
     currentFolder: process.cwd(),
-    assetsFolder: path.join(__dirname, "..", "gamemaker-config"),
+    librarySourceRoot: path.join(__dirname, ".."),
     forceSetup: force === "true",
   });
 };
