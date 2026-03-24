@@ -2,52 +2,47 @@ import path from "node:path";
 import {processObjectFile} from "./object";
 import {createProjectHandler} from "../handler/project";
 import {DEFAULT_OBJECT_FOLDER, DEFAULT_SCRIPT_FOLDER} from "../const";
-import {processScriptFile} from "./script";
 import {processProjectFile} from "./project";
+import {createScriptHandler} from "../handler/script";
 
-const processObject = (filePath: string) => {
+const processTypescriptFile = (filePath: string) => {
   try {
-    const result = processObjectFile(filePath);
+    const { objects, script } = processObjectFile(filePath);
 
     const projectHandler = createProjectHandler();
-    const objectHandler = projectHandler.getObjectHandler(result.object.name);
-
-    objectHandler.upsertObject(result.object, result.scripts);
     projectHandler.addFolder(DEFAULT_OBJECT_FOLDER);
-    projectHandler.addResource(result.object.name, objectHandler.getPath());
-  } catch (e) {
-    console.error("Failed to process object ", filePath);
-    throw e;
-  }
-};
 
-const processScript = (filePath: string) => {
-  try {
-    const result = processScriptFile(filePath);
+    for (const obj of objects) {
+      const objectHandler = projectHandler.getObjectHandler(obj.obj.name);
+      objectHandler.upsertObject(obj.obj, obj.scripts);
+      projectHandler.addResource(obj.obj.name, objectHandler.getPath());
+    }
 
-    const projectHandler = createProjectHandler();
-    const scriptHandler = projectHandler.getScriptHandler(result.script.name);
+    if (script) {
+      projectHandler.addFolder(DEFAULT_SCRIPT_FOLDER);
 
-    scriptHandler.upsertScript(result.script, result.code);
-    projectHandler.addFolder(DEFAULT_SCRIPT_FOLDER);
-    projectHandler.addResource(result.script.name, scriptHandler.getPath());
-  } catch (e) {
-    console.error("Failed to process object ", filePath);
-    throw e;
+      const scriptHandler = createScriptHandler(script.script.name);
+      scriptHandler.upsertScript(script.script, script.code);
+      projectHandler.addResource(script.script.name, scriptHandler.getPath());
+    }
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.error("Failed to process file ", filePath, e.message);
+    } else {
+      console.error("Failed to process file ", filePath);
+    }
   }
 };
 
 export const processFile = (file: string) => {
   const nameInfo = path.parse(file);
   const relative = path.relative(process.cwd(), file);
-  if (nameInfo.ext === ".ts" && nameInfo.name.startsWith("obj_")) {
-    console.time("Process object " + relative);
-    processObject(file);
-    console.timeEnd("Process object " + relative);
-  } else if (nameInfo.ext === ".ts" && nameInfo.name.startsWith("scr_")) {
-    console.time("Process script " + relative);
-    processScript(file);
-    console.timeEnd("Process script " + relative);
+
+  if (file.startsWith("src") && nameInfo.ext === ".ts") {
+    // sourcecode
+    console.time("Process typescript " + relative);
+    processTypescriptFile(file);
+    console.timeEnd("Process typescript " + relative);
   } else if (nameInfo.ext === ".yyp") {
     console.time("Process project");
     processProjectFile();
