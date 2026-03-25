@@ -244,13 +244,16 @@ export const processObjectFile = (filePath: string): IProcessedObjectFile => {
 
     const transpiled = ts.transpileModule(remainingSource, transpileObjectConfig);
 
-    script = {
-      script: createScript({
-        name: "__gen_" + fileName + "_script",
-        folder: DEFAULT_SCRIPT_FOLDER,
-      }),
-      code: transpiled.outputText,
-    };
+    if (transpiled.outputText.length > 0) {
+      // do not generate empty files
+      script = {
+        script: createScript({
+          name: "__gen_" + fileName + "_script",
+          folder: DEFAULT_SCRIPT_FOLDER,
+        }),
+        code: transpiled.outputText,
+      };
+    }
   }
 
   // The object event bodies also need to go through the GML transformers.

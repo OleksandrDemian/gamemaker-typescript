@@ -24,6 +24,21 @@ const readObject = (name: string): IObject | undefined => {
   }
 };
 
+const isSameEventsList = (a: IObject, b: IObject): boolean => {
+  const aEvents = new Set(a.eventList.map((e) => e.eventNum + "_" + e.eventType));
+  const bEvents = new Set(b.eventList.map((e) => e.eventNum + "_" + e.eventType));
+
+  // 1. Check if they have the same number of unique events
+  if (aEvents.size !== bEvents.size) return false;
+
+  // 2. Check if every event in Set A exists in Set B
+  for (const event of aEvents) {
+    if (!bEvents.has(event)) return false;
+  }
+
+  return true;
+};
+
 export const createObjectHandler = (name: string) => {
   let current: IObject | undefined = readObject(name);
 
@@ -31,11 +46,16 @@ export const createObjectHandler = (name: string) => {
     exists: () => !!current,
     getPath: () => getObjectPath(name, name + ".yy"),
     upsertObject: (object: IObject, scripts: { scriptName: string; code: string; }[]) => {
+      let flush = false;
       if (current) {
-        // for now, if exist only update events
-        current.eventList = object.eventList;
+        if (!isSameEventsList(current, object)) {
+          // for now, if exist only update events
+          current.eventList = object.eventList;
+          flush = true;
+        }
       } else {
         current = object;
+        flush = true;
       }
 
       fs.ensureDirSync(getObjectPath(name));
@@ -45,11 +65,13 @@ export const createObjectHandler = (name: string) => {
         fs.outputFileSync(getObjectPath(name, script.scriptName), script.code, "utf8");
       }
 
-      fs.outputFileSync(
-        getObjectPath(name, name + ".yy"),
-        JSON.stringify(current, null, 2),
-        "utf8"
-      );
+      if (flush) {
+        fs.outputFileSync(
+          getObjectPath(name, name + ".yy"),
+          JSON.stringify(current, null, 2),
+          "utf8"
+        );
+      }
     },
   };
 }
