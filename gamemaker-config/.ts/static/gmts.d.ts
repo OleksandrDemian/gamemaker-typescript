@@ -60,4 +60,4 @@ declare interface IDefineObjectProps <T> {
   onUserEvent15?: (this: T) => void;
 }
 
-declare function defineObject <T> (props?: IDefineObjectProps<T>): T;
+declare function defineObject <T> (props: IDefineObjectProps<T>): T;

@@ -3,7 +3,7 @@ import {IObjectEvent} from "../objectEvent";
 export interface ICreateObjectProps {
   name: string;
   folder: string;
-  eventList: any;
+  eventList: IObjectEvent[];
 }
 
 export interface IObjectParent {

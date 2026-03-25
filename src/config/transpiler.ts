@@ -9,53 +9,56 @@ const baseTranspileOptions: ts.TranspileOptions = {
   },
 };
 
-export const transpileScriptConfig: ts.TranspileOptions = {
-  ...baseTranspileOptions
-};
-
 export const transpileObjectConfig: ts.TranspileOptions = {
   ...baseTranspileOptions,
   transformers: {
     before: [
-      (context) => (rootNode) => {
-        const visitor = (node: any) => {
-          // this replacer
-          if (ts.isPropertyAccessExpression(node) && node.expression.kind === ts.SyntaxKind.ThisKeyword) {
-            return node.name; // Return just 'property'
+      (context) => (rootNode: any) => {
+        const visitor = (node: ts.Node): ts.Node => {
+          // this.property → property
+          if (
+            ts.isPropertyAccessExpression(node) &&
+            node.expression.kind === ts.SyntaxKind.ThisKeyword
+          ) {
+            return node.name;
           }
 
-          // === replacer
-          if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken) {
+          // === → ==
+          if (
+            ts.isBinaryExpression(node) &&
+            node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken
+          ) {
             return context.factory.updateBinaryExpression(
               node,
-              node.left,
+              ts.visitEachChild(node.left, visitor, context),
               context.factory.createToken(ts.SyntaxKind.EqualsEqualsToken),
-              node.right
+              ts.visitEachChild(node.right, visitor, context)
             );
           }
 
-          // !== replacer
-          if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsEqualsToken) {
+          // !== → !=
+          if (
+            ts.isBinaryExpression(node) &&
+            node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsEqualsToken
+          ) {
             return context.factory.updateBinaryExpression(
               node,
-              node.left,
+              ts.visitEachChild(node.left, visitor, context),
               context.factory.createToken(ts.SyntaxKind.ExclamationEqualsToken),
-              node.right
+              ts.visitEachChild(node.right, visitor, context)
             );
           }
 
-          // Handle this as an argument -> "id"
-          // We check if the node itself is the 'this' keyword
+          // this (standalone) → id
           if (node.kind === ts.SyntaxKind.ThisKeyword) {
-            // If you want the literal string "id", use ts.factory.createStringLiteral("id")
-            // If you want the variable name id, use ts.factory.createIdentifier("id")
             return ts.factory.createIdentifier("id");
           }
 
           return ts.visitEachChild(node, visitor, context);
         };
+
         return ts.visitNode(rootNode, visitor);
-      }
+      },
     ]
   },
 };

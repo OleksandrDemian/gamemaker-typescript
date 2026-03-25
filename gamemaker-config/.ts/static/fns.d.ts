@@ -13595,7 +13595,7 @@ declare function move_outside_all(dir: Real,maxdist: Real): Undefined;
  * @param {Real} max_x_distance - The maximum distance in the x direction the instance will move. If less than or equal to 0 no clamping is performed.
  * @param {Real} max_y_distance - The maximum distance in the y direction the instance will move. If less than or equal to 0 no clamping is performed.
  */
-declare function move_and_collide(dx: Real,dy: Real,obj: Any,num_iterations: Any,xoff: Any,yoff: Any,max_x_distance: Real,max_y_distance: Real): Array;
+declare function move_and_collide(dx: Real,dy: Real,obj: Any,num_iterations?: Any,xoff?: Any,yoff?: Any,max_x_distance?: Real,max_y_distance?: Real): Array;
 
 /**
  * With this function you can tell an instance to move out of a collision with any instance flagged as solid in any direction and any number of pixels each step, with a value of -1 or 0 for the maxdist being a default 1000px, ie: GameMaker will move the instance continually up 1000 pixels until it is out of collision.
