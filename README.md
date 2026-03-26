@@ -13,8 +13,7 @@ GameMaker TypeScript is a CLI tool that allows you to transpile TypeScript into 
 
 ## Example code
 
-⚠️ Before writing any code run `gmts setup` to configure project and create extension to automatically compile TS before starting the game.
-Also, as of now all .ts files should go in `/src` folder.
+⚠️ Before writing any code run `gmts setup` to configure project and create extension to automatically (requires v2024.14.4) compile TS before starting the game.
 
 ### Game object creation
 
@@ -156,6 +155,11 @@ gmts setup
 
 This will create a `tsconfig.json` file, configure extension to compile TS when you run your app, and copy the necessary static types into your project.
 
+### Automatic compilation
+
+Starting from version `2024.14.4` (April 2026) GameMaker added `pre_project_step` extension hook which allows to compile file before assets collection.
+So if you use that version or newer, after running `gmts setup` GameMaker will automatically compile `.ts` files before running the game.
+
 ### Compile Once
 
 It is also possible to manually compile from command line:
@@ -163,6 +167,9 @@ It is also possible to manually compile from command line:
 ```bash
 gmts compile
 ```
+
+This is useful if you have older versions that does not support `pre_project_step` hook for automatic compilation.
+You can also use this one when creating new sprites, sounds etc..., to get them typed.
 
 ## Project Structure
 
