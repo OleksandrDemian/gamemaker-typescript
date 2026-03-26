@@ -1,10 +1,10 @@
 import fs from "fs-extra";
 import path from "node:path";
 import ts from "typescript";
-import { objectEvents } from "../../events";
+import {eventByHandler} from "../../events";
 import { createObjectEvent, IObjectEvent } from "../../entities/objectEvent";
 import { createObject, IObject } from "../../entities/object";
-import { DEFAULT_OBJECT_FOLDER, DEFAULT_SCRIPT_FOLDER } from "../../const";
+import {DEFAULT_OBJECT_FOLDER, DEFAULT_SCRIPT_FOLDER, GENERATED_PREFIX} from "../../const";
 import { createScript, IScript } from "../../entities/script";
 import {transpileObjectConfig} from "../../config/transpiler";
 
@@ -31,9 +31,6 @@ export interface IProcessedObjectFile {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/** Build a lookup from handler name → event metadata for fast access. */
-const eventByHandler = new Map(objectEvents.map((e) => [e.handler, e]));
 
 /**
  * Emit a single AST node back to source text.
@@ -182,12 +179,13 @@ function buildCollectedObject(
     );
 
     scripts.push({
-      scriptName: eventMeta.name + ".gml",
+      scriptName: keyName,
       code: bodyCode,
     });
   }
 
   return {
+    // todo: redundant, I only need name
     obj: createObject({
       name,
       eventList,
@@ -248,7 +246,7 @@ export const processObjectFile = (filePath: string): IProcessedObjectFile => {
       // do not generate empty files
       script = {
         script: createScript({
-          name: "__gen_" + fileName + "_script",
+          name: GENERATED_PREFIX + fileName,
           folder: DEFAULT_SCRIPT_FOLDER,
         }),
         code: transpiled.outputText,

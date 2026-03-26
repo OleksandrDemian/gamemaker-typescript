@@ -1,11 +1,51 @@
 import fs from "fs-extra";
 import path from "node:path";
+import {createExtension, createExtensionFile} from "../entities/extension";
+import {DEFAULT_EXTENSIONS_FOLDER} from "../const";
+import {createProjectHandler} from "../handler/project";
 
 export interface ISetupProjectProps {
   currentFolder: string;
   librarySourceRoot: string;
   forceSetup: boolean;
 }
+
+const extName = "GameMaker_Typescript";
+
+const setupExtension = (props: ISetupProjectProps) => {
+  const projectHandler = createProjectHandler({
+    autoFlush: false,
+  });
+
+  const extension = createExtension({
+    name: extName,
+    folder: DEFAULT_EXTENSIONS_FOLDER,
+    files: [
+      createExtensionFile({
+        filename: "pre_project_step.bat", // windows
+      }),
+    ],
+  });
+
+  const metaFilePath = path.join(props.currentFolder, "extensions", extName, extName + ".yy");
+
+  // copy compilation trigger script
+  fs.outputFileSync(
+    metaFilePath,
+    JSON.stringify(extension, null, 2),
+    {
+      encoding: "utf8",
+    }
+  );
+  fs.copyFileSync(
+    path.join(props.librarySourceRoot, "gamemaker-config", "extensions", "files", "pre_project_step.bat"),
+    path.join(props.currentFolder, "extensions", extName, "pre_project_step.bat")
+  );
+
+  projectHandler.addFolder(DEFAULT_EXTENSIONS_FOLDER);
+  projectHandler.addResource(extName, metaFilePath);
+  projectHandler.flush();
+};
 
 export const setupTsProject = (props: ISetupProjectProps) => {
   if (!props.forceSetup) {
@@ -35,4 +75,6 @@ export const setupTsProject = (props: ISetupProjectProps) => {
     encoding: "utf8",
     spaces: 2,
   });
+
+  setupExtension(props);
 };

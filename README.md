@@ -13,6 +13,9 @@ GameMaker TypeScript is a CLI tool that allows you to transpile TypeScript into 
 
 ## Example code
 
+⚠️ Before writing any code run `gmts setup` to configure project and create extension to automatically compile TS before starting the game.
+Also, as of now all .ts files should go in `/src` folder.
+
 ### Game object creation
 
 Here is an example of how to create an object which can be moved on the map using keyboard (filename: `src/player.ts`):
@@ -51,8 +54,6 @@ const obj_player = defineObject<IPlayer>({
 
 });
 ```
-
-If you are using manual compilation (`gmts compile`) you should recompile after each file save. It is better to use `gmts watch` to automatically compile only changed files.
 
 ### Script
 
@@ -173,21 +174,11 @@ Before using the tool, you need to set it up. Run the following command to initi
 gmts setup
 ```
 
-This will create a `tsconfig.json` file and copy the necessary static types into your project.
-
-### Watch Mode
-
-To start the tool in watch mode, which automatically recompiles files on changes, run:
-
-```bash
-gmts watch
-```
-
-This is preferred to manual compilation because it will only compile files that change (compile will always compile entire project).
+This will create a `tsconfig.json` file, configure extension to compile TS when you run your app, and copy the necessary static types into your project.
 
 ### Compile Once
 
-To compile your TypeScript files into GML, run:
+It is also possible to manually compile from command line:
 
 ```bash
 gmts compile

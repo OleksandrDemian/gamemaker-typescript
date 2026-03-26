@@ -1,50 +1,39 @@
 import path from "node:path";
 import fs from "fs-extra";
+import {IProjectHandler} from "../project";
 import {IScript} from "../../entities/script";
-import js5 from "json5";
+import {IProjectResource} from "../../entities/project";
 
-const getScriptPath = (name: string, ...rest: string[])=> path.join("scripts", name, ...rest);
-
-// todo: make async
-const cleanupScript = (name: string) => {
-  fs.readdirSync(getScriptPath(name)).forEach(file => {
+const cleanupScriptFolder = (scriptFolder: string) => {
+  fs.readdirSync(scriptFolder).forEach(file => {
     if (file.endsWith(".gml")) {
       // gml script, remove
-      fs.removeSync(getScriptPath(name, file));
+      fs.removeSync(path.join(scriptFolder, file));
     }
   });
 };
 
-const readScript = (name: string): IScript | undefined => {
-  try {
-    const file = fs.readFileSync(getScriptPath(name, name + ".yy"), "utf8");
-    return js5.parse(file) as IScript;
-  } catch (error) {
-    return undefined;
-  }
-};
+export interface IScriptHandler {
+  exists(): boolean;
+  create (script: IScript): IProjectResource;
+  attachScript(script: string): void;
+}
 
-export const createScriptHandler = (name: string) => {
-  let current: IScript | undefined = readScript(name);
-
+export const createScriptHandler = (project: IProjectHandler, name: string): IScriptHandler => {
   return {
-    exists: () => !!current,
-    getPath: () => getScriptPath(name, name + ".yy"),
-    upsertScript: (script: IScript, code: string) => {
-      if (!current) {
-        current = script;
-      } else {
-        // we don't care if something changes, existing script always wins
+    exists: () => project.hasRes("scripts", name),
+    create: (script: IScript) => {
+      const metaPath = path.join("scripts", name, name + ".yy");
+      fs.outputFileSync(metaPath, JSON.stringify(script));
+      return project.addResource(name, metaPath);
+    },
+    attachScript: (code: string) => {
+      const res = project.getRes("scripts", name);
+      if (res) {
+        const folder = path.dirname(res.id.path); // resource folder
+        cleanupScriptFolder(folder);
+        fs.outputFileSync(path.join(folder, res.id.name + ".gml"), code, "utf8");
       }
-
-      fs.ensureDirSync(getScriptPath(name));
-      cleanupScript(script.name);
-      fs.outputFileSync(getScriptPath(name, script.name + ".gml"), code, "utf8");
-      fs.outputFileSync(
-        getScriptPath(name, name + ".yy"),
-        JSON.stringify(current, null, 2),
-        "utf8"
-      );
     },
   };
 };

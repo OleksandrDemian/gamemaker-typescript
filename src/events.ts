@@ -295,3 +295,5 @@ export const objectEvents: IObjectEvent[] = [
   },
   ...objectAlarmEvents,
 ];
+
+export const eventByHandler = new Map(objectEvents.map((e) => [e.handler, e]));
