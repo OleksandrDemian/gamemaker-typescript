@@ -1,32 +1,42 @@
-import chokidar from "chokidar";
-import fs from "fs-extra";
-import {processFile} from "./processor";
 import {setupTsProject} from "./setup";
 import path from "node:path";
+import {createProjectHandler} from "./handler/project";
+import {OBJECT_PATH_PREFIX, SCRIPT_PATH_PREFIX} from "./const";
+import {processProjectFile} from "./processor/project";
 
 const compile = () => {
-  console.log("Compiling TS project");
+  const srcPath = process.cwd();
+
+  console.log("Compiling TS project", srcPath);
   console.time("Compile project");
-  const result = fs.readdirSync(process.cwd(), { recursive: true, encoding: "utf8" });
 
-  for (const file of result) {
-    processFile(file);
-  }
+  const projectHandler = createProjectHandler();
 
+  projectHandler.iterateResources((res) => {
+    if (res.id.path.startsWith(OBJECT_PATH_PREFIX)) {
+      const objectHandler = projectHandler.getObjectHandler(res.id.name);
+      objectHandler.compile();
+    } else if (res.id.path.startsWith(SCRIPT_PATH_PREFIX)) {
+      const scriptHandler = projectHandler.getScriptHandler(res.id.name);
+      scriptHandler.compile();
+    }
+  });
+
+  processProjectFile(projectHandler);
   console.timeEnd("Compile project");
 };
 
-const watch = () => {
-  // Watch files
-  console.log("Watching for files");
-  chokidar
-    .watch("./", {
-      // ignoreInitial: true, skip files when starting the service
-      /// todo: ignore useless files
-    })
-    .on("add", processFile)
-    .on("change", processFile);
-};
+// const watch = () => {
+//   // Watch files
+//   console.log("Watching for files");
+//   chokidar
+//     .watch("./", {
+//       // ignoreInitial: true, skip files when starting the service
+//       /// todo: ignore useless files
+//     })
+//     .on("add", compileSingleFile)
+//     .on("change", compileSingleFile);
+// };
 
 const health = () => {
   console.log("Looks healthy");
@@ -44,7 +54,10 @@ const [command = "compile", ...rest] = process.argv.slice(2);
 
 switch (command) {
   case "compile": compile(); break;
-  case "watch": watch(); break;
+  // remove watch for now, the extension will build project before running.
+  // otherwise run "gmts compile" manually to rebuild when needed
+  // on demand compile will come later
+  // case "watch": watch(); break;
   case "health": health(); break;
   case "setup": setup(rest[0]); break;
 }

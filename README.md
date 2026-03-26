@@ -6,12 +6,15 @@ GameMaker TypeScript is a CLI tool that allows you to transpile TypeScript into 
 
 ## Features
 
-- **Compile Typescript files**: Automatically transpile TypeScript files (`.ts`) in the `/src` directory.
+- **Compile Typescript files**: Automatically transpile TypeScript files (`.ts`) found in scripts and objects. It follows [resource hoisting](#resource-hoisting).
 - **Automatic Asset Scanning**: Automatically scans for sprites, rooms, tilesets and sounds in your project.
 - **Strong Typing**: Enforces strong types for better code quality and improved autocomplete.
 - **IDE Compatibility**: Works seamlessly with any IDE, including VS Code, WebStorm, and others.
 
 ## Example code
+
+⚠️ Before writing any code run `gmts setup` to configure project and create extension to automatically compile TS before starting the game.
+Also, as of now all .ts files should go in `/src` folder.
 
 ### Game object creation
 
@@ -52,8 +55,6 @@ const obj_player = defineObject<IPlayer>({
 });
 ```
 
-If you are using manual compilation (`gmts compile`) you should recompile after each file save. It is better to use `gmts watch` to automatically compile only changed files.
-
 ### Script
 
 It is also possible to create a script (filename: `src/player_fns.ts`):
@@ -66,38 +67,6 @@ function increase_player_speed (obj: IPlayer) {
   obj.movement_speed += 2;
 }
 
-```
-
-Additionally, you could place functions and objects in the same file, function will be extracted into a separate script at compilation:
-
-```typescript
-interface IPlayer extends GMObject {
-  movement_speed: number;
-}
-
-// this will generate obj_player GameMaker Object
-const obj_player = defineObject<IPlayer>({
-  onCreate() {
-    this.movement_speed = 2;
-  },
-  onStep() {
-    player_move(this);
-  },
-});
-
-// this will be extracted into __gen_player_script GameMaker Script
-function player_move (player: IPlayer) {
-  var _hspd = keyboard_check(vk_right) - keyboard_check(vk_left);
-  var _vspd = keyboard_check(vk_down) - keyboard_check(vk_up);
-
-  if (_hspd != 0 || _vspd != 0) {
-    var _dir = point_direction(0, 0, _hspd, _vspd);
-    var _xadd = lengthdir_x(player.movement_speed, _dir);
-    var _yadd = lengthdir_y(player.movement_speed, _dir);
-    player.x = player.x + _xadd;
-    player.y = player.y + _yadd;
-  }
-}
 ```
 
 ### Advanced usage
@@ -125,6 +94,7 @@ interface IEnemy extends GMObject, IDamaggeble {
   // ... other enemy specific properties
 }
 
+// obj_player/code.ts
 // Create obj_player, since it extends IDamaggeble it will have 'hp' property
 const obj_player = defineObject<IPlayer>({
   onCreate() {
@@ -132,6 +102,7 @@ const obj_player = defineObject<IPlayer>({
   },
 });
 
+// obj_enemy/code.ts
 // Create obj_enemy, since it extends IDamaggeble it will have 'hp' property
 const obj_enemy = defineObject<IEnemy>({
   onCreate() {
@@ -139,12 +110,14 @@ const obj_enemy = defineObject<IEnemy>({
   },
 });
 
+// obj_wrong/code.ts
 const obj_wrong = defineObject({
   onCreate() {
     
   },
 });
 
+// obj_test/code.ts
 const obj_test = defineObject<GMObject>({
   onCreate() {
     apply_damage(obj_player); // ok, because obj_player is IDamaggeble
@@ -154,6 +127,14 @@ const obj_test = defineObject<GMObject>({
 });
 
 ```
+
+## Resource hoisting
+
+⚠️ To make this library stable and fully compatible with GameMaker's inner workings this project uses resource hoisting.
+The hoisting requires the `.ts` file to be part of the GM resource such as `Object` or `Script`.
+So for example, if I create an object `obj_player`, the relative `.ts` should be placed in `/objects/obj_player/code.ts` (you can use any name for .ts file).
+
+This ensures the library never touches `.yyp` file to prevent corruption or de-synchronization. It also ensures that any changes done to the GM resource, applies to the `.ts` (ex: rename, move, etc...).
 
 ## Installation
 
@@ -173,21 +154,11 @@ Before using the tool, you need to set it up. Run the following command to initi
 gmts setup
 ```
 
-This will create a `tsconfig.json` file and copy the necessary static types into your project.
-
-### Watch Mode
-
-To start the tool in watch mode, which automatically recompiles files on changes, run:
-
-```bash
-gmts watch
-```
-
-This is preferred to manual compilation because it will only compile files that change (compile will always compile entire project).
+This will create a `tsconfig.json` file, configure extension to compile TS when you run your app, and copy the necessary static types into your project.
 
 ### Compile Once
 
-To compile your TypeScript files into GML, run:
+It is also possible to manually compile from command line:
 
 ```bash
 gmts compile

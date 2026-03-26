@@ -1,4 +1,4 @@
-import {createProjectHandler} from "../../handler/project";
+import {createProjectHandler, IProjectHandler} from "../../handler/project";
 import {IProjectResource} from "../../entities/project";
 import fs from "fs-extra";
 import path from "node:path";
@@ -27,9 +27,8 @@ const writeTypesFile = (filename: string, file: string) => {
   );
 };
 
-export const processProjectFile = () => {
+export const processProjectFile = (project: IProjectHandler) => {
   // todo: avoid writing types that hasn't changed
-  const project = createProjectHandler();
   const sprites: IProjectResource[] = [];
   const sounds: IProjectResource[] = [];
   const rooms: IProjectResource[] = [];

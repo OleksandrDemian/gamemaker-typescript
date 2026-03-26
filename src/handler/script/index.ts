@@ -1,50 +1,54 @@
 import path from "node:path";
 import fs from "fs-extra";
-import {IScript} from "../../entities/script";
-import js5 from "json5";
+import {IProjectHandler} from "../project";
+import {processScriptFile} from "../../processor/script";
 
-const getScriptPath = (name: string, ...rest: string[])=> path.join("scripts", name, ...rest);
+const findTsFile = (folder: string): string | undefined => {
+  // find .ts file
+  const files = fs.readdirSync(folder);
+  for (const file of files) {
+    if (file.endsWith(".ts")) {
+      // our code file
+      return file;
+    }
+  }
 
-// todo: make async
-const cleanupScript = (name: string) => {
-  fs.readdirSync(getScriptPath(name)).forEach(file => {
+  return undefined;
+}
+
+const cleanupScriptFolder = (scriptFolder: string) => {
+  fs.readdirSync(scriptFolder).forEach(file => {
     if (file.endsWith(".gml")) {
       // gml script, remove
-      fs.removeSync(getScriptPath(name, file));
+      fs.removeSync(path.join(scriptFolder, file));
     }
   });
 };
 
-const readScript = (name: string): IScript | undefined => {
-  try {
-    const file = fs.readFileSync(getScriptPath(name, name + ".yy"), "utf8");
-    return js5.parse(file) as IScript;
-  } catch (error) {
-    return undefined;
-  }
-};
+export interface IScriptHandler {
+  compile(): boolean;
+}
 
-export const createScriptHandler = (name: string) => {
-  let current: IScript | undefined = readScript(name);
+export const createScriptHandler = (project: IProjectHandler, name: string): IScriptHandler => {
+  const resource = project.getResource("scripts", name);
+  if (!resource) {
+    throw new Error(`Unable to create object handler for ${name}`);
+  }
 
   return {
-    exists: () => !!current,
-    getPath: () => getScriptPath(name, name + ".yy"),
-    upsertScript: (script: IScript, code: string) => {
-      if (!current) {
-        current = script;
-      } else {
-        // we don't care if something changes, existing script always wins
+    compile () {
+      const folder = path.dirname(resource.id.path); // resource folder
+      const tsSource = findTsFile(folder);
+
+      if (!tsSource) {
+        return false;
       }
 
-      fs.ensureDirSync(getScriptPath(name));
-      cleanupScript(script.name);
-      fs.outputFileSync(getScriptPath(name, script.name + ".gml"), code, "utf8");
-      fs.outputFileSync(
-        getScriptPath(name, name + ".yy"),
-        JSON.stringify(current, null, 2),
-        "utf8"
-      );
+      const result = processScriptFile(path.join(folder, tsSource));
+
+      cleanupScriptFolder(folder);
+      fs.outputFileSync(path.join(folder, resource.id.name + ".gml"), result.code, "utf8");
+      return true;
     },
   };
 };

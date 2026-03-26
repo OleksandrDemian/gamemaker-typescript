@@ -1,32 +1,46 @@
 import fs from "fs-extra";
 import path from "node:path";
+import {IProjectHandler} from "../project";
 import {IObject} from "../../entities/object";
 import js5 from "json5";
+import {createObjectEvent} from "../../entities/objectEvent";
+import {eventByHandler} from "../../events";
+import {processObjectFile} from "../../processor/object";
 
-const getObjectPath = (name: string, ...rest: string[])=> path.join("objects", name, ...rest);
-
-// todo: make async
-const cleanupObject = (name: string) => {
-  fs.readdirSync(getObjectPath(name)).forEach(file => {
+const cleanupObjectFolder = (objectFolder: string) => {
+  fs.readdirSync(objectFolder).forEach(file => {
     if (file.endsWith(".gml")) {
       // gml script, remove
-      fs.removeSync(getObjectPath(name, file));
+      fs.removeSync(path.join(objectFolder, file));
     }
   });
 };
 
-const readObject = (name: string): IObject | undefined => {
+const readObject = (path: string): IObject | undefined => {
   try {
-    const file = fs.readFileSync(getObjectPath(name, name + ".yy"), "utf8");
+    const file = fs.readFileSync(path, "utf8");
     return js5.parse(file) as IObject;
   } catch (error) {
     return undefined;
   }
 };
 
-const isSameEventsList = (a: IObject, b: IObject): boolean => {
-  const aEvents = new Set(a.eventList.map((e) => e.eventNum + "_" + e.eventType));
-  const bEvents = new Set(b.eventList.map((e) => e.eventNum + "_" + e.eventType));
+const findTsFile = (folder: string): string | undefined => {
+  // find .ts file
+  const files = fs.readdirSync(folder);
+  for (const file of files) {
+    if (file.endsWith(".ts")) {
+      // our code file
+      return file;
+    }
+  }
+
+  return undefined;
+}
+
+const isSameEventsList = (a: IObject["eventList"], b: IObject["eventList"]): boolean => {
+  const aEvents = new Set(a.map((e) => e.eventNum + "_" + e.eventType));
+  const bEvents = new Set(b.map((e) => e.eventNum + "_" + e.eventType));
 
   // 1. Check if they have the same number of unique events
   if (aEvents.size !== bEvents.size) return false;
@@ -35,43 +49,67 @@ const isSameEventsList = (a: IObject, b: IObject): boolean => {
   for (const event of aEvents) {
     if (!bEvents.has(event)) return false;
   }
-
   return true;
 };
 
-export const createObjectHandler = (name: string) => {
-  let current: IObject | undefined = readObject(name);
+export interface IObjectHandler {
+  compile (): boolean;
+}
+
+export const createObjectHandler = (project: IProjectHandler, name: string): IObjectHandler => {
+  const resource = project.getResource("objects", name);
+  if (!resource) {
+    throw new Error(`Unable to create object handler for ${name}`);
+  }
 
   return {
-    exists: () => !!current,
-    getPath: () => getObjectPath(name, name + ".yy"),
-    upsertObject: (object: IObject, scripts: { scriptName: string; code: string; }[]) => {
-      let flush = false;
-      if (current) {
-        if (!isSameEventsList(current, object)) {
-          // for now, if exist only update events
-          current.eventList = object.eventList;
-          flush = true;
-        }
-      } else {
-        current = object;
-        flush = true;
+    compile () {
+      const eventList: IObject["eventList"] = [];
+
+      const folder = path.dirname(resource.id.path); // resource folder
+      const resFilePath = resource.id.path;
+      const tsFile = findTsFile(folder); // take first .ts
+
+      if (!tsFile) {
+        // no file to process, exit
+        return false;
       }
 
-      fs.ensureDirSync(getObjectPath(name));
-      cleanupObject(name);
+      const { objects } = processObjectFile(path.join(folder, tsFile));
 
-      for (const script of scripts) {
-        fs.outputFileSync(getObjectPath(name, script.scriptName), script.code, "utf8");
+      if (objects.length < 1) {
+        console.warn(`No objects detected, skip processing.`);
+        return false;
       }
 
-      if (flush) {
+      if (objects.length > 1) {
+        console.warn(`Multiple objects detected, but only the first one will be used.`);
+      }
+
+      // remove existing .gml
+      cleanupObjectFolder(folder);
+
+      // write all new events
+      for (const script of objects[0].scripts) {
+        const eventInfo = eventByHandler.get(script.scriptName)!;
+        fs.outputFileSync(path.join(folder, eventInfo.name + ".gml"), script.code, "utf8");
+        eventList.push(createObjectEvent({
+          eventNum: eventInfo.eventNum,
+          eventType: eventInfo.eventType,
+        }));
+      }
+
+      const cur = readObject(resFilePath);
+      if (cur && !isSameEventsList(eventList, cur.eventList)) {
+        cur.eventList = eventList;
         fs.outputFileSync(
-          getObjectPath(name, name + ".yy"),
-          JSON.stringify(current, null, 2),
+          resFilePath,
+          JSON.stringify(cur, null, 2),
           "utf8"
         );
       }
+
+      return true;
     },
   };
 }
