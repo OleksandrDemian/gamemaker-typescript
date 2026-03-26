@@ -5,6 +5,7 @@ import {IObject} from "../../entities/object";
 import js5 from "json5";
 import {createObjectEvent} from "../../entities/objectEvent";
 import {eventByHandler} from "../../events";
+import {processObjectFile} from "../../processor/object";
 
 const cleanupObjectFolder = (objectFolder: string) => {
   fs.readdirSync(objectFolder).forEach(file => {
@@ -24,6 +25,19 @@ const readObject = (path: string): IObject | undefined => {
   }
 };
 
+const findTsFile = (folder: string): string | undefined => {
+  // find .ts file
+  const files = fs.readdirSync(folder);
+  for (const file of files) {
+    if (file.endsWith(".ts")) {
+      // our code file
+      return file;
+    }
+  }
+
+  return undefined;
+}
+
 const isSameEventsList = (a: IObject["eventList"], b: IObject["eventList"]): boolean => {
   const aEvents = new Set(a.map((e) => e.eventNum + "_" + e.eventType));
   const bEvents = new Set(b.map((e) => e.eventNum + "_" + e.eventType));
@@ -39,46 +53,63 @@ const isSameEventsList = (a: IObject["eventList"], b: IObject["eventList"]): boo
 };
 
 export interface IObjectHandler {
-  exists (): boolean;
-  attachScripts (scripts: { scriptName: string; code: string; }[]): void;
+  compile (): boolean;
 }
 
 export const createObjectHandler = (project: IProjectHandler, name: string): IObjectHandler => {
+  const resource = project.getResource("objects", name);
+  if (!resource) {
+    throw new Error(`Unable to create object handler for ${name}`);
+  }
+
   return {
-    exists(): boolean {
-      return project.hasRes("object", name);
-    },
-    attachScripts: (scripts) => {
-      const res = project.getRes("object", name);
+    compile () {
       const eventList: IObject["eventList"] = [];
 
-      if (res) {
-        const folder = path.dirname(res.id.path); // resource folder
+      const folder = path.dirname(resource.id.path); // resource folder
+      const resFilePath = resource.id.path;
+      const tsFile = findTsFile(folder); // take first .ts
 
-        // remove existing .gml
-        cleanupObjectFolder(folder);
-
-        // write all new events
-        for (const script of scripts) {
-          const eventInfo = eventByHandler.get(script.scriptName)!;
-          fs.outputFileSync(path.join(folder, eventInfo.name + ".gml"), script.code, "utf8");
-          eventList.push(createObjectEvent({
-            eventNum: eventInfo.eventNum,
-            eventType: eventInfo.eventType,
-          }));
-        }
-
-        const cur = readObject(res.id.path);
-        if (cur && !isSameEventsList(eventList, cur.eventList)) {
-          // update events list
-          cur.eventList = eventList;
-          fs.outputFileSync(
-            res.id.path,
-            JSON.stringify(cur, null, 2),
-            "utf8"
-          );
-        }
+      if (!tsFile) {
+        // no file to process, exit
+        return false;
       }
+
+      const { objects } = processObjectFile(path.join(folder, tsFile));
+
+      if (objects.length < 1) {
+        console.warn(`No objects detected, skip processing.`);
+        return false;
+      }
+
+      if (objects.length > 1) {
+        console.warn(`Multiple objects detected, but only the first one will be used.`);
+      }
+
+      // remove existing .gml
+      cleanupObjectFolder(folder);
+
+      // write all new events
+      for (const script of objects[0].scripts) {
+        const eventInfo = eventByHandler.get(script.scriptName)!;
+        fs.outputFileSync(path.join(folder, eventInfo.name + ".gml"), script.code, "utf8");
+        eventList.push(createObjectEvent({
+          eventNum: eventInfo.eventNum,
+          eventType: eventInfo.eventType,
+        }));
+      }
+
+      const cur = readObject(resFilePath);
+      if (cur && !isSameEventsList(eventList, cur.eventList)) {
+        cur.eventList = eventList;
+        fs.outputFileSync(
+          resFilePath,
+          JSON.stringify(cur, null, 2),
+          "utf8"
+        );
+      }
+
+      return true;
     },
   };
 }

@@ -1,16 +1,10 @@
 import ts from "typescript";
 
-const baseTranspileOptions: ts.TranspileOptions = {
+export const transpilerConfig: ts.TranspileOptions = {
   compilerOptions: {
     target: ts.ScriptTarget.ES5,
     module: ts.ModuleKind.CommonJS,
-    preserveConstEnums: true,
-    useDefineForClassFields: false,
   },
-};
-
-export const transpileObjectConfig: ts.TranspileOptions = {
-  ...baseTranspileOptions,
   transformers: {
     before: [
       (context) => (rootNode: any) => {

@@ -1,4 +1,3 @@
-export const DEFAULT_OBJECT_FOLDER = "Objects";
-export const DEFAULT_SCRIPT_FOLDER = "__generated__";
 export const DEFAULT_EXTENSIONS_FOLDER = "Extensions";
-export const GENERATED_PREFIX = "__gen__";
+export const OBJECT_PATH_PREFIX = "objects";
+export const SCRIPT_PATH_PREFIX = "scripts";

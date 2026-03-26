@@ -13,9 +13,7 @@ export interface ISetupProjectProps {
 const extName = "GameMaker_Typescript";
 
 const setupExtension = (props: ISetupProjectProps) => {
-  const projectHandler = createProjectHandler({
-    autoFlush: false,
-  });
+  const projectHandler = createProjectHandler();
 
   const extension = createExtension({
     name: extName,
@@ -67,7 +65,7 @@ export const setupTsProject = (props: ISetupProjectProps) => {
   newTsConfig.include = [
     path.join(".", ".ts", "**", "*.d.ts"), // generated types
     path.join(".", "global.d.ts"), // user defined globals
-    path.join(".", "src", "**", "*.ts"), // code
+    path.join("**", "*.ts"), // code
   ];
 
   // copy files

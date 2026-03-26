@@ -3,7 +3,6 @@ import {createProjectFolder, IProject, IProjectResource} from "../../entities/pr
 import js5 from "json5";
 import {createObjectHandler, IObjectHandler} from "../object";
 import {createScriptHandler, IScriptHandler} from "../script";
-import {GENERATED_PREFIX} from "../../const";
 
 const findProjectFile = (): string => {
   // find .yyp file
@@ -26,21 +25,14 @@ const readProjectFile = (path: string): IProject => {
 export interface IProjectHandler {
   flush (reload?: boolean): void;
   addResource (name: string, path: string): IProjectResource;
-  removeResource (name: string): void;
   addFolder (name: string): void;
-  addRoom (name: string, path: string): boolean;
   getObjectHandler (name: string): IObjectHandler;
   getScriptHandler (name: string): IScriptHandler;
   iterateResources (cb: (res: IProjectResource) => void): void;
-  getRes (type: 'object' | 'scripts', name: string): IProjectResource | undefined;
-  hasRes (type: 'object' | 'scripts', name: string): boolean;
-  listGeneratedScripts (): IProjectResource[];
+  getResource(type: 'scripts' | 'objects', name: string): IProjectResource | undefined;
 }
 
-export interface ICreateProjectHandlerProps {
-  autoFlush: boolean;
-}
-export const createProjectHandler = (props: ICreateProjectHandlerProps): IProjectHandler => {
+export const createProjectHandler = (): IProjectHandler => {
   const projectFilePath = findProjectFile();
   let project = readProjectFile(projectFilePath);
 
@@ -56,7 +48,27 @@ export const createProjectHandler = (props: ICreateProjectHandlerProps): IProjec
 
   return {
     flush,
+    getObjectHandler (name: string) {
+      return createObjectHandler(this, name);
+    },
 
+    getScriptHandler (name: string) {
+      return createScriptHandler(this, name);
+    },
+
+    iterateResources (cb: (res: IProjectResource) => void) {
+      project.resources.forEach(cb);
+    },
+
+    getResource(type, name): IProjectResource | undefined {
+      for (const res of project.resources) {
+        if (res.id.name === name && res.id.path.startsWith(type)) {
+          return res;
+        }
+      }
+
+      return undefined;
+    },
     addResource (name: string, path: string): IProjectResource {
       // check if resource exists
       const res = project.resources.find(resource => {
@@ -74,16 +86,7 @@ export const createProjectHandler = (props: ICreateProjectHandlerProps): IProjec
         }
       };
       project.resources.push(resource);
-      if (props.autoFlush) {
-        flush();
-      }
-
       return resource;
-    },
-    removeResource (name: string) {
-      project.resources = project.resources.filter((res) => {
-        return res.id.name !== name;
-      });
     },
 
     addFolder (name: string) {
@@ -94,69 +97,10 @@ export const createProjectHandler = (props: ICreateProjectHandlerProps): IProjec
 
       if (!exists) {
         project.Folders.push(createProjectFolder(name));
-        if (props.autoFlush) {
-          flush();
-        }
         return true;
       }
 
       return false;
     },
-    addRoom (name: string, path: string): boolean {
-      const exists = project.RoomOrderNodes.some(room => {
-        return room.roomId.name === name;
-      });
-
-      if (!exists) {
-        project.RoomOrderNodes.push({
-          roomId: {
-            name,
-            path,
-          }
-        });
-        if (props.autoFlush) {
-          flush();
-        }
-        return true;
-      }
-
-      return false;
-    },
-
-    getObjectHandler (name: string) {
-      return createObjectHandler(this, name);
-    },
-
-    getScriptHandler (name: string) {
-      return createScriptHandler(this, name);
-    },
-
-    iterateResources (cb: (res: IProjectResource) => void) {
-      project.resources.forEach(cb);
-    },
-
-    getRes(type, name): IProjectResource | undefined {
-      for (const res of project.resources) {
-        if (res.id.name === name && res.id.path.startsWith(type)) {
-          return res;
-        }
-      }
-
-      return undefined;
-    },
-    hasRes(type, name): boolean {
-      for (const res of project.resources) {
-        if (res.id.name === name && res.id.path.startsWith(type)) {
-          return true;
-        }
-      }
-
-      return false;
-    },
-    listGeneratedScripts (): IProjectResource[] {
-      return project.resources.filter((res) => {
-        return res.id.name.startsWith(GENERATED_PREFIX);
-      });
-    }
   };
 };
