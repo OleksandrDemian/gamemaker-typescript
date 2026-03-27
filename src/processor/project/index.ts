@@ -15,11 +15,15 @@ const generateRoomsTypes = (sounds: IProjectResource[]): string => {
   return sounds.reduce((acc, res) => acc + `declare const ${res.id.name}: Asset.GMRoom;\n`, '');
 };
 
+const generateObjectsTypes = (sounds: IProjectResource[], customClasses: Map<string, string>): string => {
+  return sounds.reduce((acc, res) => acc + `declare const ${res.id.name}: ${customClasses.get(res.id.name) || 'any'};\n`, '');
+};
+
 const generateTilesetTypes = (sounds: IProjectResource[]): string => {
   return sounds.reduce((acc, res) => acc + `declare const ${res.id.name}: Asset.GMTileSet;\n`, '');
 };
 
-const writeTypesFile = (filename: string, file: string) => {
+export const writeTypesFile = (filename: string, file: string) => {
   fs.outputFileSync(
     path.join(process.cwd(), ".ts", "__generated", filename),
     file,
@@ -27,12 +31,13 @@ const writeTypesFile = (filename: string, file: string) => {
   );
 };
 
-export const processProjectFile = (project: IProjectHandler) => {
+export const processProjectFile = (project: IProjectHandler, customClasses: Map<string, string>) => {
   // todo: avoid writing types that hasn't changed
   const sprites: IProjectResource[] = [];
   const sounds: IProjectResource[] = [];
   const rooms: IProjectResource[] = [];
   const tileset: IProjectResource[] = [];
+  const objects: IProjectResource[] = [];
 
   project.iterateResources((res) => {
     if (res.id.path.startsWith("sprites")) {
@@ -43,6 +48,8 @@ export const processProjectFile = (project: IProjectHandler) => {
       rooms.push(res);
     } else if (res.id.path.startsWith("tilesets")) {
       tileset.push(res);
+    } else if (res.id.path.startsWith("objects")) {
+      objects.push(res);
     }
   });
 
@@ -50,4 +57,5 @@ export const processProjectFile = (project: IProjectHandler) => {
   writeTypesFile("sounds.d.ts", generateSoundTypes(sounds));
   writeTypesFile("tilesets.d.ts", generateTilesetTypes(tileset));
   writeTypesFile("rooms.d.ts", generateRoomsTypes(rooms));
+  writeTypesFile("objects.d.ts", generateObjectsTypes(objects, customClasses));
 };

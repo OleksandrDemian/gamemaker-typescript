@@ -52,8 +52,12 @@ const isSameEventsList = (a: IObject["eventList"], b: IObject["eventList"]): boo
   return true;
 };
 
+export interface IObjectHandlerCompileOptions {
+  onEmitClass (objName: string, className: string): void;
+}
+
 export interface IObjectHandler {
-  compile (): boolean;
+  compile (opts?: IObjectHandlerCompileOptions): boolean;
 }
 
 export const createObjectHandler = (project: IProjectHandler, name: string): IObjectHandler => {
@@ -63,7 +67,7 @@ export const createObjectHandler = (project: IProjectHandler, name: string): IOb
   }
 
   return {
-    compile () {
+    compile (props) {
       const eventList: IObject["eventList"] = [];
 
       const folder = path.dirname(resource.id.path); // resource folder
@@ -75,22 +79,19 @@ export const createObjectHandler = (project: IProjectHandler, name: string): IOb
         return false;
       }
 
-      const { objects } = processObjectFile(path.join(folder, tsFile));
+      const processResult = processObjectFile(path.join(folder, tsFile));
 
-      if (objects.length < 1) {
-        console.warn(`No objects detected, skip processing.`);
+      if (!processResult) {
+        props?.onEmitClass?.(name, "any");
+        console.warn(`No GMObject classes detected, skip processing.`);
         return false;
-      }
-
-      if (objects.length > 1) {
-        console.warn(`Multiple objects detected, but only the first one will be used.`);
       }
 
       // remove existing .gml
       cleanupObjectFolder(folder);
 
       // write all new events
-      for (const script of objects[0].scripts) {
+      for (const script of processResult.scripts) {
         const eventInfo = eventByHandler.get(script.scriptName)!;
         fs.outputFileSync(path.join(folder, eventInfo.name + ".gml"), script.code, "utf8");
         eventList.push(createObjectEvent({
@@ -107,6 +108,10 @@ export const createObjectHandler = (project: IProjectHandler, name: string): IOb
           JSON.stringify(cur, null, 2),
           "utf8"
         );
+      }
+
+      if (processResult?.className) {
+        props?.onEmitClass?.(name, processResult.className);
       }
 
       return true;

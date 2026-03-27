@@ -266,7 +266,7 @@ declare function audio_pause_sound(index: Any): Undefined;
  * @param {Real} pitch - Sets the pitch of the sound played.
  * @param {Real} listener_mask - Sets the listener mask of the sound played.
  */
-declare function audio_play_sound(index: GMSound,priority: Real,loop: Bool,gain: Real,offset: Any,pitch: Real,listener_mask: Real): Sound;
+declare function audio_play_sound(index: GMSound, priority: Real, loop: Bool, gain: Real, offset: Any, pitch: Real, listener_mask?: Real): Sound;
 
 /**
  * With this function you can play any sound resource at a given position within the audio space. You provide the sound index and then assign it a position within the 3D space. The default listener position is (0, 0, 0) so this means that if the listener has not been moved and you want the sound to come from the left (for example), you should set the x position to a negative value (for more information on setting the listener position see audio_listener_position()).

@@ -1,6 +1,5 @@
 /// <reference path="./fns.d.ts" />
 /// <reference path="./const.d.ts" />
-/// <reference path="./gmts.d.ts" />
 /// <reference path="./id.d.ts" />
 /// <reference path="./pointer.d.ts" />
 /// <reference path="./enums.d.ts" />

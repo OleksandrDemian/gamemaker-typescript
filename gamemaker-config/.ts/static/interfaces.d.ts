@@ -1131,7 +1131,67 @@ declare interface TileSetInfo {
 
 }
 
-declare interface GMObject {
+declare class GMObject {
+    // --- Main & Cleanup ---
+    onCreate?(): void;
+    onDestroy?(): void;
+    onCleanUp?(): void;
+    onRoomStart?(): void;
+    onRoomEnd?(): void;
+    onGameEnd?(): void;
+
+    // --- Step ---
+    onBeginStep?(): void;
+    onStep?(): void;
+    onEndStep?(): void;
+
+    // --- Draw ---
+    onPreDraw?(): void;
+    onDrawBegin?(): void;
+    onDraw?(): void;
+    onDrawEnd?(): void;
+    onPostDraw?(): void;
+
+    // --- Draw GUI ---
+    onDrawGuiBegin?(): void;
+    onDrawGui?(): void;
+    onDrawGuiEnd?(): void;
+
+    // --- Async & Other ---
+    onAnimationUpdate?(): void;
+    onAnimationEvent?(): void;
+    onAsyncImageLoaded?(): void;
+    onAsyncHttp?(): void;
+    onAsyncSystem?(): void;
+    onAsyncSocial?(): void;
+    onAsyncSteam?(): void;
+    onAsyncDialog?(): void;
+    onAsyncSaveLoad?(): void;
+    onBroadcastMessage?(): void;
+
+    // --- Input ---
+    onGlobalLeftReleased?(): void;
+    onGlobalRightReleased?(): void;
+    onGlobalMiddleReleased?(): void;
+
+    // --- User Events (0-15) ---
+    onUserEvent0?(): void;
+    onUserEvent1?(): void;
+    onUserEvent2?(): void;
+    onUserEvent3?(): void;
+    onUserEvent4?(): void;
+    onUserEvent5?(): void;
+    onUserEvent6?(): void;
+    onUserEvent7?(): void;
+    onUserEvent8?(): void;
+    onUserEvent9?(): void;
+    onUserEvent10?(): void;
+    onUserEvent11?(): void;
+    onUserEvent12?(): void;
+    onUserEvent13?(): void;
+    onUserEvent14?(): void;
+    onUserEvent15?(): void;
+    
     /**
      * This 1 dimension array is used to get the current value for any alarms that the instance may have, or it can be used to set those alarms. There are twelve alarms built into each instance of an object, and each one has its own event that will run when this variable reaches 0.
      */

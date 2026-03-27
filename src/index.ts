@@ -2,7 +2,7 @@ import {setupTsProject} from "./setup";
 import path from "node:path";
 import {createProjectHandler} from "./handler/project";
 import {OBJECT_PATH_PREFIX, SCRIPT_PATH_PREFIX} from "./const";
-import {processProjectFile} from "./processor/project";
+import {processProjectFile, writeTypesFile} from "./processor/project";
 
 const compile = () => {
   const srcPath = process.cwd();
@@ -11,18 +11,23 @@ const compile = () => {
   console.time("Compile project");
 
   const projectHandler = createProjectHandler();
+  const customClassesMap: Map<string, string> = new Map();
 
   projectHandler.iterateResources((res) => {
     if (res.id.path.startsWith(OBJECT_PATH_PREFIX)) {
       const objectHandler = projectHandler.getObjectHandler(res.id.name);
-      objectHandler.compile();
+      objectHandler.compile({
+        onEmitClass (objName, className) {
+          customClassesMap.set(objName, className);
+        },
+      });
     } else if (res.id.path.startsWith(SCRIPT_PATH_PREFIX)) {
       const scriptHandler = projectHandler.getScriptHandler(res.id.name);
       scriptHandler.compile();
     }
   });
 
-  processProjectFile(projectHandler);
+  processProjectFile(projectHandler, customClassesMap);
   console.timeEnd("Compile project");
 };
 
