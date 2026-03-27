@@ -17,26 +17,19 @@ GameMaker TypeScript is a CLI tool that allows you to transpile TypeScript into 
 
 ### Game object creation
 
-Here is an example of how to create an object which can be moved on the map using keyboard (filename: `src/player.ts`):
+TS classes are bound to the GameMaker objects, so you first need to create GM object in IDE, and then place `.ts` script in the same folder as `.yy`.
+
+Here is an example of how to create an object which can be moved on the map using keyboard (filename: `objects/obj_player/code.ts`):
 
 ```typescript
-interface IPlayer extends GMObject {
-  // Create interface to describe shape of the object
-  // extend GMObject to inherit all the base properties, like x, y, etc...
-
-  // movement_speed is a new property unique to our obj_player
-  movement_speed: number;
-}
-
-// create object using defineObject function
-// defineObject is a generic function and it receives in input object type (in this case IPlayer)
-const obj_player = defineObject<IPlayer>({
+class Player extends GMObject {
+  movment_speed: number;
 
   // inside of the defineObject you can declare all of your events, like onCreate, onStep, onDraw etc...
   onCreate() {
     // use "this." keyword to access object properties in a safe fully typed way
     this.movement_speed = 2;
-  },
+  }
 
   onStep() {
     var _hspd = keyboard_check(vk_right) - keyboard_check(vk_left);
@@ -49,81 +42,21 @@ const obj_player = defineObject<IPlayer>({
         this.x = this.x + _xadd;
         this.y = this.y + _yadd;
     }
-  },
-
-});
+  }
+}
 ```
 
 ### Script
 
-It is also possible to create a script (filename: `src/player_fns.ts`):
+It is also possible to create a script (filename: `scripts/scr_player/code.ts`):
 
 ```typescript
 
 // you can fully type arguments, in this case we tell that obj is IPlayer, so only IPlayer can be passed here
-function increase_player_speed (obj: IPlayer) {
+function increase_player_speed (obj: Player) {
   // here you have full autocomplete for player object, plus, if you try to pass something that is not IPlayer, the code editor will tell you about your mistake
   obj.movement_speed += 2;
 }
-
-```
-
-### Advanced usage
-
-You can also use interfaces to specialize your objects. For example, lets create a shared interface that allows multiple objects to share some properties:
-
-```typescript
-interface IDamaggeble {
-  // all damaggeble object has health
-  hp: number;
-}
-
-// in this case we accept in input any entity that implements IDamagable interface, i.e. has hp
-function apply_damage (obj: IDamagable) {
-  obj.hp -= 1; // we don't care if object is player or enemy, because both implement IDamagable interface
-}
-
-interface IPlayer extends GMObject, IDamaggeble {
-  // hp is inherited from IDamaggeble
-  // ... other player specific properties
-}
-
-interface IEnemy extends GMObject, IDamaggeble {
-  // hp is inherited from IDamaggeble
-  // ... other enemy specific properties
-}
-
-// obj_player/code.ts
-// Create obj_player, since it extends IDamaggeble it will have 'hp' property
-const obj_player = defineObject<IPlayer>({
-  onCreate() {
-    this.hp = 10; // since IPlayer implements IDamaggeble it has health
-  },
-});
-
-// obj_enemy/code.ts
-// Create obj_enemy, since it extends IDamaggeble it will have 'hp' property
-const obj_enemy = defineObject<IEnemy>({
-  onCreate() {
-    this.hp = 2; // since IPlayer implements IDamaggeble it has health
-  },
-});
-
-// obj_wrong/code.ts
-const obj_wrong = defineObject({
-  onCreate() {
-    
-  },
-});
-
-// obj_test/code.ts
-const obj_test = defineObject<GMObject>({
-  onCreate() {
-    apply_damage(obj_player); // ok, because obj_player is IDamaggeble
-    apply_damage(obj_enemy); // ok, because obj_enemy is IDamaggeble
-    apply_damage(obj_wrong); // not ok, because obj_wrong is not IDamaggeble, so the code editor will tell you there is an error
-  },
-});
 
 ```
 

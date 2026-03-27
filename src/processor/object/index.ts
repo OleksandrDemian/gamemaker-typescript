@@ -5,168 +5,89 @@ import {transpilerConfig} from "../../config/transpiler";
 
 interface ICollectedObject {
   scripts: { scriptName: string; code: string }[];
+  className: string;
 }
 
-export interface IProcessedObjectFile {
-  objects: ICollectedObject[];
+function applyGMLVisitor<T extends ts.Statement>(node: T, context: ts.TransformationContext): T {
+  const visitor = (node: ts.Node): ts.Node => {
+    // this.property → property
+    if (ts.isPropertyAccessExpression(node) && node.expression.kind === ts.SyntaxKind.ThisKeyword) {
+      return node.name;
+    }
+    // === → ==
+    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken) {
+      return context.factory.updateBinaryExpression(
+        node,
+        ts.visitEachChild(node.left, visitor, context),
+        context.factory.createToken(ts.SyntaxKind.EqualsEqualsToken),
+        ts.visitEachChild(node.right, visitor, context)
+      );
+    }
+    // !== → !=
+    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsEqualsToken) {
+      return context.factory.updateBinaryExpression(
+        node,
+        ts.visitEachChild(node.left, visitor, context),
+        context.factory.createToken(ts.SyntaxKind.ExclamationEqualsToken),
+        ts.visitEachChild(node.right, visitor, context)
+      );
+    }
+    // this → id
+    if (node.kind === ts.SyntaxKind.ThisKeyword) {
+      return ts.factory.createIdentifier("id");
+    }
+    return ts.visitEachChild(node, visitor, context);
+  };
+
+  return ts.visitNode(node, visitor) as T;
 }
 
-const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
+export function processObjectFile(filePath: string): ICollectedObject | null {
+  const sourceCode = fs.readFileSync(filePath, "utf-8");
+  const sourceFile = ts.createSourceFile(
+    "temp.ts",
+    sourceCode,
+    ts.ScriptTarget.ES5,
+    true
+  );
 
-function emitNode(node: ts.Node, sourceFile: ts.SourceFile): string {
-  return printer.printNode(ts.EmitHint.Unspecified, node, sourceFile);
-}
+  const result: ICollectedObject = {
+    scripts: [],
+    className: '',
+  };
 
-function extractFunctionBody(
-  node:
-    | ts.FunctionExpression
-    | ts.ArrowFunction
-    | ts.MethodDeclaration
-    | ts.FunctionDeclaration,
-  sourceFile: ts.SourceFile
-): string | undefined {
-  const body = node.body;
-  if (!body || !ts.isBlock(body)) return undefined;
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
-  return body.statements
-    .map((stmt) => emitNode(stmt, sourceFile))
-    .join("\n");
-}
+  for (const statement of sourceFile.statements) {
+    if (!ts.isClassDeclaration(statement) || !statement.name) continue;
+    //
+    // const extendsGMObject = statement.heritageClauses?.some((clause) =>
+    //   clause.token === ts.SyntaxKind.ExtendsKeyword &&
+    //   clause.types.some(
+    //     (t) => ts.isIdentifier(t.expression) && t.expression.text === "GMObject"
+    //   )
+    // );
+    // if (!extendsGMObject) continue;
 
-// ---------------------------------------------------------------------------
-// AST analysis: collect defineObject calls + the remaining "plain" code
-// ---------------------------------------------------------------------------
+    result.className = statement.name.text;
 
-interface IAnalysisResult {
-  objects: ICollectedObject[];
-}
+    for (const member of statement.members) {
+      if (!ts.isMethodDeclaration(member) || !ts.isIdentifier(member.name)) continue;
 
-function analyzeSourceFile(sourceFile: ts.SourceFile): IAnalysisResult {
-  const objects: ICollectedObject[] = [];
+      const methodName = member.name.text;
+      if (!eventByHandler.has(methodName)) continue;
 
-  for (const stmt of sourceFile.statements) {
-    const objectName = tryExtractDefineObjectName(stmt);
+      const bodyStatements = member.body?.statements ?? [];
+      const code = bodyStatements
+        .map((s) => printer.printNode(ts.EmitHint.Unspecified, s, sourceFile))
+        .join("\n");
 
-    if (objectName !== undefined) {
-      const callExpr = getDefineObjectCall(stmt)!;
-      const collected = buildCollectedObject(callExpr, sourceFile);
-      if (collected) {
-        objects.push(collected);
-      }
-      // The entire variable declaration is consumed — do NOT add to remaining.
+      result.scripts.push({
+        scriptName: methodName,
+        code: ts.transpileModule(code, transpilerConfig).outputText,
+      });
     }
   }
 
-  return { objects };
+  return result;
 }
-
-function tryExtractDefineObjectName(stmt: ts.Statement): string | undefined {
-  if (!ts.isVariableStatement(stmt)) return undefined;
-
-  const { declarations } = stmt.declarationList;
-  if (declarations.length !== 1) return undefined;
-
-  const [decl] = declarations;
-  if (!decl.initializer || !ts.isCallExpression(decl.initializer)) return undefined;
-
-  const callee = decl.initializer.expression;
-  if (!ts.isIdentifier(callee) || callee.text !== "defineObject") return undefined;
-
-  if (!ts.isIdentifier(decl.name)) return undefined;
-
-  return decl.name.text;
-}
-
-function getDefineObjectCall(stmt: ts.Statement): ts.CallExpression | undefined {
-  if (!ts.isVariableStatement(stmt)) return undefined;
-  const decl = stmt.declarationList.declarations[0];
-  if (!decl?.initializer || !ts.isCallExpression(decl.initializer)) return undefined;
-  return decl.initializer;
-}
-
-function buildCollectedObject(
-  callExpr: ts.CallExpression,
-  sourceFile: ts.SourceFile
-): ICollectedObject | undefined {
-  if (callExpr.arguments.length === 0) return undefined;
-
-  const schemaArg = callExpr.arguments[0];
-  if (!ts.isObjectLiteralExpression(schemaArg)) return undefined;
-
-  const scripts: ICollectedObject["scripts"] = [];
-
-  for (const prop of schemaArg.properties) {
-    if (!ts.isMethodDeclaration(prop) && !ts.isPropertyAssignment(prop)) continue;
-
-    // Resolve property key name
-    const keyName = resolvePropertyName(prop);
-    if (!keyName) continue;
-
-    const eventMeta = eventByHandler.get(keyName);
-    if (!eventMeta) continue;
-
-    // Extract the function body
-    const fnNode = ts.isPropertyAssignment(prop)
-      ? asFunctionLike(prop.initializer)
-      : prop;
-
-    if (!fnNode) continue;
-
-    const bodyCode = extractFunctionBody(fnNode as any, sourceFile);
-    if (bodyCode === undefined) continue;
-
-    scripts.push({
-      scriptName: keyName,
-      code: bodyCode,
-    });
-  }
-
-  return {
-    scripts,
-  };
-}
-
-function resolvePropertyName(
-  prop: ts.ObjectLiteralElementLike
-): string | undefined {
-  if (ts.isMethodDeclaration(prop) || ts.isPropertyAssignment(prop)) {
-    const { name } = prop;
-    if (ts.isIdentifier(name)) return name.text;
-    if (ts.isStringLiteral(name)) return name.text;
-  }
-  return undefined;
-}
-
-function asFunctionLike(
-  node: ts.Expression
-): ts.FunctionExpression | ts.ArrowFunction | undefined {
-  if (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) return node;
-  return undefined;
-}
-
-export const processObjectFile = (filePath: string): IProcessedObjectFile => {
-  const source = fs.readFileSync(filePath, "utf-8");
-
-  const sourceFile = ts.createSourceFile(
-    filePath,
-    source,
-    ts.ScriptTarget.Latest,
-    /*setParentNodes*/ true
-  );
-
-  const { objects } = analyzeSourceFile(sourceFile);
-
-  // The object event bodies also need to go through the GML transformers.
-  // We do this by transpiling each script's code individually.
-  const transpiledObjects: ICollectedObject[] = objects.map((collected) => ({
-    ...collected,
-    scripts: collected.scripts.map(({ scriptName, code }) => ({
-      scriptName,
-      code: ts.transpileModule(code, transpilerConfig).outputText,
-    })),
-  }));
-
-  return {
-    objects: transpiledObjects,
-  };
-};
