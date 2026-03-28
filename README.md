@@ -2,14 +2,16 @@
 
 GameMaker TypeScript is a CLI tool that allows you to transpile TypeScript into GameMaker Language (GML). It provides strong typing, better autocomplete, and compatibility with any IDE, making it easier to develop GameMaker projects with TypeScript.
 
-⚠️ This project is in very early stage of development ⚠️
+![Gamemaker with typescript and VS Code](https://raw.githubusercontent.com/OleksandrDemian/gamemaker-typescript/refs/heads/master/assets/example_1.png)
+
+⚠️ This project is in very early stage of development and requires GameMaker v2024.14.4 (March 2026)
 
 ## Features
 
 - **Compile Typescript files**: Automatically transpile TypeScript files (`.ts`) found in scripts and objects. It follows [resource hoisting](#resource-hoisting).
 - **Automatic Asset Scanning**: Automatically scans for sprites, rooms, tilesets and sounds in your project.
 - **Strong Typing**: Enforces strong types for better code quality and improved autocomplete.
-- **IDE Compatibility**: Works seamlessly with any IDE, including VS Code, WebStorm, and others.
+- **Code editors compatible**: Works seamlessly with any code editors, including VS Code, WebStorm, and others.
 
 ## Example code
 
@@ -104,14 +106,12 @@ gmts compile
 This is useful if you have older versions that does not support `pre_project_step` hook for automatic compilation.
 You can also use this one when creating new sprites, sounds etc..., to get them typed.
 
-## Project Structure
-
-All .ts files should go into `/src` folder in project root.
-
 ## Current Limitations
 
 - The package is currently in the Proof of Concept (PoC) stage.
 - Types are incomplete, and not all object types are supported yet.
+- Enums are not supported
+- Constructor function are not supported
 
 ## Contributing
 
@@ -120,3 +120,19 @@ Contributions are welcome! If you encounter any issues or have suggestions for i
 ## License
 
 This project is licensed under the MIT License.
+
+## Examples
+
+### Autocomplete GML
+
+![gamemaker-typescript](https://raw.githubusercontent.com/OleksandrDemian/gamemaker-typescript/refs/heads/master/assets/example_2.png)
+
+![gamemaker-typescript](https://raw.githubusercontent.com/OleksandrDemian/gamemaker-typescript/refs/heads/master/assets/example_4.png)
+
+### Type safe
+
+![gamemaker-typescript](https://raw.githubusercontent.com/OleksandrDemian/gamemaker-typescript/refs/heads/master/assets/example_3.png)
+
+![gamemaker-typescript](https://raw.githubusercontent.com/OleksandrDemian/gamemaker-typescript/refs/heads/master/assets/example_6.png)
+
+![gamemaker-typescript](https://raw.githubusercontent.com/OleksandrDemian/gamemaker-typescript/refs/heads/master/assets/example_7.png)
