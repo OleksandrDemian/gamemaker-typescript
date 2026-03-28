@@ -20,5 +20,5 @@
     "isolatedModules": true
   },
   "include": ["src/**/*"],
-  "exclude": ["./gamemaker-config"]
+  "exclude": ["./gamemaker-config", "**/*.example.ts"]
 }

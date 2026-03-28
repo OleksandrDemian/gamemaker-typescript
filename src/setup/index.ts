@@ -1,8 +1,9 @@
 import fs from "fs-extra";
 import path from "node:path";
 import {createExtension, createExtensionFile} from "../entities/extension";
-import {DEFAULT_EXTENSIONS_FOLDER} from "../const";
+import {DEFAULT_EXTENSIONS_FOLDER, MIN_REQUIRED_IDE_VERSION} from "../const";
 import {createProjectHandler} from "../handler/project";
+import {logColors} from "../utils/logColors";
 
 export interface ISetupProjectProps {
   currentFolder: string;
@@ -46,6 +47,16 @@ const setupExtension = (props: ISetupProjectProps) => {
 };
 
 export const setupTsProject = (props: ISetupProjectProps) => {
+  const projectHandler = createProjectHandler();
+
+  if (!projectHandler.isCompatible()) {
+    console.error(`
+    ---- ${logColors.red`Error`} -------
+    This project uses incompatible IDE version. Minimum required IDE version is ${MIN_REQUIRED_IDE_VERSION} (current project uses ${projectHandler.version()}).
+    ------------------`);
+    return;
+  }
+
   if (!props.forceSetup) {
     try {
       const tsConfig = fs.readFileSync(path.join(props.currentFolder, "tsconfig.json"), "utf8");

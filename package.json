@@ -10,7 +10,8 @@
     "gamemaker-typescript": "bin/lib.js"
   },
   "scripts": {
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "test:unit": "vitest run"
   },
   "files": [
     "bin/",
@@ -33,7 +34,8 @@
   "devDependencies": {
     "@types/node": "^25.5.0",
     "@types/typescript": "^2.0.0",
-    "esbuild": "^0.27.4"
+    "esbuild": "^0.27.4",
+    "vitest": "^4.1.2"
   },
   "keywords": [
     "gamemaker",

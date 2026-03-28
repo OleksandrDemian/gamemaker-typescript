@@ -1,0 +1,61 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`processScriptFile() > should correctly parse a script 1`] = `
+{
+  "code": "function test() {
+    show_debug_message("Test");
+}
+",
+}
+`;
+
+exports[`processScriptFile() > should correctly parse a script when arguments have default values 1`] = `
+{
+  "code": "function test(i = 2, j = "hello") {
+    return i == j;
+}
+",
+}
+`;
+
+exports[`processScriptFile() > should correctly parse a script where functions have arguments 1`] = `
+{
+  "code": "function test(i, j) {
+    return i == j;
+}
+",
+}
+`;
+
+exports[`processScriptFile() > should correctly parse a script with a bunch of stuff in it 1`] = `
+{
+  "code": "function test2(i = 2, j = "hello") {
+    return i == j;
+}
+function test3(i = 2, j = "hello") {
+    return i == j;
+}
+function test3(i = 2, j = "hello") {
+    var a = i * 2;
+    return j + a;
+}
+function test4() {
+    var a = 2, b = 5;
+    return a * b;
+}
+",
+}
+`;
+
+exports[`processScriptFile() > should correctly parse a script with const and let declarations 1`] = `
+{
+  "code": "function test() {
+    var a = 2, b = 5;
+    var c = 2, d = 5;
+    var s = 1;
+    var g = 9;
+    return a * b + c * d + s + g;
+}
+",
+}
+`;

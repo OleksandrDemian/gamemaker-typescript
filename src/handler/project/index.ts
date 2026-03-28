@@ -3,6 +3,8 @@ import {createProjectFolder, IProject, IProjectResource} from "../../entities/pr
 import js5 from "json5";
 import {createObjectHandler, IObjectHandler} from "../object";
 import {createScriptHandler, IScriptHandler} from "../script";
+import {MIN_REQUIRED_IDE_VERSION} from "../../const";
+import {isVersionHigher} from "../../utils/version";
 
 const findProjectFile = (): string => {
   // find .yyp file
@@ -30,6 +32,8 @@ export interface IProjectHandler {
   getScriptHandler (name: string): IScriptHandler;
   iterateResources (cb: (res: IProjectResource) => void): void;
   getResource(type: 'scripts' | 'objects', name: string): IProjectResource | undefined;
+  isCompatible(): boolean;
+  version(): string;
 }
 
 export const createProjectHandler = (): IProjectHandler => {
@@ -48,6 +52,11 @@ export const createProjectHandler = (): IProjectHandler => {
 
   return {
     flush,
+
+    version() {
+      return project.MetaData.IDEVersion;
+    },
+
     getObjectHandler (name: string) {
       return createObjectHandler(this, name);
     },
@@ -102,5 +111,9 @@ export const createProjectHandler = (): IProjectHandler => {
 
       return false;
     },
+
+    isCompatible() {
+      return isVersionHigher(project.MetaData.IDEVersion, MIN_REQUIRED_IDE_VERSION);
+    }
   };
 };

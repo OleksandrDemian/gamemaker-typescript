@@ -1,49 +1,15 @@
-import fs from "fs-extra";
 import ts from "typescript";
-import {eventByHandler} from "../../events";
+import {eventByHandler, OnCreateHandler} from "../../events";
 import {transpilerConfig} from "../../config/transpiler";
+import {readFileSync} from "../../utils/files";
 
 interface ICollectedObject {
   scripts: { scriptName: string; code: string }[];
   className: string;
 }
 
-function applyGMLVisitor<T extends ts.Statement>(node: T, context: ts.TransformationContext): T {
-  const visitor = (node: ts.Node): ts.Node => {
-    // this.property → property
-    if (ts.isPropertyAccessExpression(node) && node.expression.kind === ts.SyntaxKind.ThisKeyword) {
-      return node.name;
-    }
-    // === → ==
-    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken) {
-      return context.factory.updateBinaryExpression(
-        node,
-        ts.visitEachChild(node.left, visitor, context),
-        context.factory.createToken(ts.SyntaxKind.EqualsEqualsToken),
-        ts.visitEachChild(node.right, visitor, context)
-      );
-    }
-    // !== → !=
-    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsEqualsToken) {
-      return context.factory.updateBinaryExpression(
-        node,
-        ts.visitEachChild(node.left, visitor, context),
-        context.factory.createToken(ts.SyntaxKind.ExclamationEqualsToken),
-        ts.visitEachChild(node.right, visitor, context)
-      );
-    }
-    // this → id
-    if (node.kind === ts.SyntaxKind.ThisKeyword) {
-      return ts.factory.createIdentifier("id");
-    }
-    return ts.visitEachChild(node, visitor, context);
-  };
-
-  return ts.visitNode(node, visitor) as T;
-}
-
 export function processObjectFile(filePath: string): ICollectedObject | null {
-  const sourceCode = fs.readFileSync(filePath, "utf-8");
+  const sourceCode = readFileSync(filePath);
   const sourceFile = ts.createSourceFile(
     "temp.ts",
     sourceCode,
@@ -56,18 +22,11 @@ export function processObjectFile(filePath: string): ICollectedObject | null {
     className: '',
   };
 
-  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
+  const preCreateScripts: string[] = [];
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed, removeComments: false });
 
   for (const statement of sourceFile.statements) {
     if (!ts.isClassDeclaration(statement) || !statement.name) continue;
-    //
-    // const extendsGMObject = statement.heritageClauses?.some((clause) =>
-    //   clause.token === ts.SyntaxKind.ExtendsKeyword &&
-    //   clause.types.some(
-    //     (t) => ts.isIdentifier(t.expression) && t.expression.text === "GMObject"
-    //   )
-    // );
-    // if (!extendsGMObject) continue;
 
     result.className = statement.name.text;
 
@@ -75,17 +34,61 @@ export function processObjectFile(filePath: string): ICollectedObject | null {
       if (!ts.isMethodDeclaration(member) || !ts.isIdentifier(member.name)) continue;
 
       const methodName = member.name.text;
-      if (!eventByHandler.has(methodName)) continue;
 
       const bodyStatements = member.body?.statements ?? [];
-      const code = bodyStatements
+      const bodyCode = bodyStatements
         .map((s) => printer.printNode(ts.EmitHint.Unspecified, s, sourceFile))
         .join("\n");
 
+      if (eventByHandler.has(methodName)) {
+        result.scripts.push({
+          scriptName: methodName,
+          code: ts.transpileModule(bodyCode, transpilerConfig).outputText,
+        });
+      } else {
+        const params = member.parameters
+          .map((p) => {
+            // Create a synthetic version of the parameter that HAS an initializer
+            // but NO type annotation.
+            const cleanParam = ts.factory.createParameterDeclaration(
+              undefined,
+              p.dotDotDotToken,
+              p.name,
+              undefined, // This removes the '?' optional marker
+              undefined, // This removes the ': type' annotation
+              p.initializer // This KEEPS the '= 3'
+            );
+
+            // Print this "clean" node using ESNext target
+            return printer.printNode(ts.EmitHint.Unspecified, cleanParam, sourceFile);
+          })
+          .join(", ");
+
+        const methodDefinition = `${methodName} = function(${params}) {\n${bodyCode}}`;
+        preCreateScripts.push(
+          ts.transpileModule(methodDefinition, transpilerConfig).outputText
+        );
+      }
+    }
+
+    break; // only compile first class
+  }
+
+  if (preCreateScripts.length > 0) {
+    const onCreateScript = result.scripts.find((scr) => scr.scriptName === OnCreateHandler);
+    const pre = preCreateScripts.join("\n\n");
+    if (onCreateScript) {
+      onCreateScript.code = [
+        `// Object methods from ${result.className}`,
+        pre,
+        "// End object methods\n",
+        onCreateScript.code,
+      ].join("\n");
+    } else {
       result.scripts.push({
-        scriptName: methodName,
-        code: ts.transpileModule(code, transpilerConfig).outputText,
-      });
+        scriptName: OnCreateHandler,
+        code: pre,
+      })
     }
   }
 

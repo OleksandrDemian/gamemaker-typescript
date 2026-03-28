@@ -44,6 +44,8 @@ for (let i = 0; i < 10; i++) {
   });
 }
 
+export const OnCreateHandler = "onCreate";
+
 export const objectEvents: IObjectEvent[] = [
   {
     label: 'Create',
@@ -51,7 +53,7 @@ export const objectEvents: IObjectEvent[] = [
     eventNum: 0,
     eventType: EventTypes.CREATE,
     group: 'main',
-    handler: "onCreate",
+    handler: OnCreateHandler,
   },
   {
     label: 'Destroy',

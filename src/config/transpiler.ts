@@ -2,7 +2,7 @@ import ts from "typescript";
 
 export const transpilerConfig: ts.TranspileOptions = {
   compilerOptions: {
-    target: ts.ScriptTarget.ES5,
+    target: ts.ScriptTarget.ES2015,
     module: ts.ModuleKind.CommonJS,
   },
   transformers: {
@@ -46,6 +46,16 @@ export const transpilerConfig: ts.TranspileOptions = {
           // this (standalone) → id
           if (node.kind === ts.SyntaxKind.ThisKeyword) {
             return ts.factory.createIdentifier("id");
+          }
+
+          if (ts.isVariableDeclarationList(node)) {
+            // If it's 'const' or 'let', we swap the flag to 0 (which is 'var')
+            if (ts.isVariableDeclarationList(node)) {
+              return ts.factory.createVariableDeclarationList(
+                node.declarations,
+                ts.NodeFlags.None // This is where you force it to 'var'
+              );
+            }
           }
 
           return ts.visitEachChild(node, visitor, context);

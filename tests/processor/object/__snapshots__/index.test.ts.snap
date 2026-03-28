@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`processObjectFile() > should correctly parse a class name and its methods into scripts 1`] = `
+{
+  "className": "TestObject",
+  "scripts": [
+    {
+      "code": "movement_speed = 3;
+",
+      "scriptName": "onCreate",
+    },
+  ],
+}
+`;
+
+exports[`processObjectFile() > should handle methods within a class 1`] = `
+{
+  "className": "TestObject",
+  "scripts": [
+    {
+      "code": "// Object methods from TestObject
+changeSpeed = function (speed) {
+    movement_speed = speed;
+};
+
+// End object methods
+
+movement_speed = 3;
+",
+      "scriptName": "onCreate",
+    },
+  ],
+}
+`;
+
+exports[`processObjectFile() > should handle methods within a class without onCreate event 1`] = `
+{
+  "className": "TestObject",
+  "scripts": [
+    {
+      "code": "changeSpeed = function (speed) {
+    movement_speed = speed;
+};
+",
+      "scriptName": "onCreate",
+    },
+  ],
+}
+`;
