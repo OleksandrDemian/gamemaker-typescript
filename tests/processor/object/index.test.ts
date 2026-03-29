@@ -28,4 +28,14 @@ describe('processObjectFile()', () => {
     const result = processExampleObjFile("obj_w_methods_no_create");
     expect(result).toMatchSnapshot();
   });
+
+  it('should handle methods inheritance when extending', async () => {
+    const result = processExampleObjFile("obj_w_extends");
+    expect(result).toMatchSnapshot();
+  });
+
+  it('obj_example_1', async () => {
+    const result = processExampleObjFile("obj_example_1");
+    expect(result).toMatchSnapshot();
+  });
 });

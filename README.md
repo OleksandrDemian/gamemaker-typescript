@@ -48,6 +48,49 @@ class Player extends GMObject {
 }
 ```
 
+You can also extend other object and use inheritance:
+
+```typescript
+// obj_base/code.ts
+class Base extends GMObject {
+  movement_speed: number;
+
+  move (in_h: number, in_v: number) {
+    // in_h and in_v are compued by obj_base, here we receive result and make player move using movement_speed
+    if (in_h != 0 || in_v != 0) {
+      this.sprite_index = spr_player_move;
+      this.x += this.movement_speed * in_h;
+      this.y += this.movement_speed * in_v;
+
+      if (in_h > 0) {
+        this.image_xscale = 1;
+      } else {
+        this.image_xscale = -1;
+      }
+    } else {
+      this.sprite_index = spr_player_idle;
+    }
+  }
+}
+
+// obj_player/code.ts
+class Player extends Base {
+  onCreate(): void {
+    this.movement_speed = 2;
+  }
+
+  onStep (): void {
+    var h = keyboard_check(ord("D")) - keyboard_check(ord("A"));
+    var v = keyboard_check(ord("S")) - keyboard_check(ord("W"));
+
+    // this.move is inherited from obj_base
+    this.move(h, v);
+  }
+}
+```
+
+⚠️ Currently extending class does not make GM assign parent, you will have to do it manually in GM Editor.
+
 ### Script
 
 It is also possible to create a script (filename: `scripts/scr_player/code.ts`):

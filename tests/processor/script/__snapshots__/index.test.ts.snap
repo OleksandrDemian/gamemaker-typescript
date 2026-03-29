@@ -2,7 +2,8 @@
 
 exports[`processScriptFile() > should correctly parse a script 1`] = `
 {
-  "code": "function test() {
+  "code": "// @ts-nocheck
+function test() {
     show_debug_message("Test");
 }
 ",
@@ -11,7 +12,8 @@ exports[`processScriptFile() > should correctly parse a script 1`] = `
 
 exports[`processScriptFile() > should correctly parse a script when arguments have default values 1`] = `
 {
-  "code": "function test(i = 2, j = "hello") {
+  "code": "// @ts-nocheck
+function test(i = 2, j = "hello") {
     return i == j;
 }
 ",
@@ -20,7 +22,8 @@ exports[`processScriptFile() > should correctly parse a script when arguments ha
 
 exports[`processScriptFile() > should correctly parse a script where functions have arguments 1`] = `
 {
-  "code": "function test(i, j) {
+  "code": "// @ts-nocheck
+function test(i, j) {
     return i == j;
 }
 ",
@@ -29,7 +32,8 @@ exports[`processScriptFile() > should correctly parse a script where functions h
 
 exports[`processScriptFile() > should correctly parse a script with a bunch of stuff in it 1`] = `
 {
-  "code": "function test2(i = 2, j = "hello") {
+  "code": "// @ts-nocheck
+function test2(i = 2, j = "hello") {
     return i == j;
 }
 function test3(i = 2, j = "hello") {
@@ -49,7 +53,8 @@ function test4() {
 
 exports[`processScriptFile() > should correctly parse a script with const and let declarations 1`] = `
 {
-  "code": "function test() {
+  "code": "// @ts-nocheck
+function test() {
     var a = 2, b = 5;
     var c = 2, d = 5;
     var s = 1;

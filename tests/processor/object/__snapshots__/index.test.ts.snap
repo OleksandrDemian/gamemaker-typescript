@@ -1,11 +1,71 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`processObjectFile() > obj_example_1 1`] = `
+{
+  "className": "Base",
+  "extendedClassName": "GMObject",
+  "scripts": [
+    {
+      "code": "var _xx = x;
+var _yy = y - 40;
+var x = x;
+// Draw Shadow
+draw_set_color(c_black);
+draw_text(_xx + 2, _yy + 2, name);
+// Draw Main Text
+draw_set_color(c_white);
+draw_text(_xx, _yy, name);
+",
+      "scriptName": "onDrawGui",
+    },
+    {
+      "code": "event_inherited();",
+      "scriptName": "onCreate",
+    },
+  ],
+}
+`;
+
 exports[`processObjectFile() > should correctly parse a class name and its methods into scripts 1`] = `
 {
   "className": "TestObject",
+  "extendedClassName": "GMObject",
   "scripts": [
     {
-      "code": "movement_speed = 3;
+      "code": "event_inherited();
+
+movement_speed = 3;
+",
+      "scriptName": "onCreate",
+    },
+  ],
+}
+`;
+
+exports[`processObjectFile() > should handle methods inheritance when extending 1`] = `
+{
+  "className": "Player",
+  "extendedClassName": "Entity",
+  "scripts": [
+    {
+      "code": "event_inherited();
+
+__super_Player_move = move;
+move = function (dx, dy) {
+    __super_Player_move(dx, dy);
+};
+
+
+__super_Player_say_hi = say_hi;
+say_hi = function () {
+    __super_Player_say_hi();
+};
+
+
+__super_Player_mind_own_biz = mind_own_biz;
+mind_own_biz = function () {
+    sprite_index = spr_mind_own_biz;
+};
 ",
       "scriptName": "onCreate",
     },
@@ -16,9 +76,11 @@ exports[`processObjectFile() > should correctly parse a class name and its metho
 exports[`processObjectFile() > should handle methods within a class 1`] = `
 {
   "className": "TestObject",
+  "extendedClassName": "GMObject",
   "scripts": [
     {
-      "code": "// Object methods from TestObject
+      "code": "event_inherited();
+// Object methods from TestObject
 changeSpeed = function (speed) {
     movement_speed = speed;
 };
@@ -36,9 +98,12 @@ movement_speed = 3;
 exports[`processObjectFile() > should handle methods within a class without onCreate event 1`] = `
 {
   "className": "TestObject",
+  "extendedClassName": "GMObject",
   "scripts": [
     {
-      "code": "changeSpeed = function (speed) {
+      "code": "event_inherited();
+
+changeSpeed = function (speed) {
     movement_speed = speed;
 };
 ",
