@@ -2,6 +2,10 @@
 class Base extends GMObject {
   name: string;
 
+  onStep () {
+    move_player(this); // move_player is external script
+  }
+
   onDrawGui(): void {
     const _xx = this.x;
     let _yy = this.y - 40;

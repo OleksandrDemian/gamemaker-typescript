@@ -83,12 +83,15 @@ export const createTranspilerConfig = (props?: ICreateTranspilerConfigProps): ts
       before: [
         (context) => (rootNode: any) => {
           const visitor = (node: ts.Node): ts.Node => {
-            // this.property → property
+            // this.property → self.property
             if (
               ts.isPropertyAccessExpression(node) &&
               node.expression.kind === ts.SyntaxKind.ThisKeyword
             ) {
-              return ts.factory.createIdentifier(node.name.text);
+              return ts.factory.createPropertyAccessExpression(
+                ts.factory.createIdentifier("self"), // The new receiver
+                node.name                                 // The original property name
+              );
             }
 
             // === → ==
@@ -117,9 +120,9 @@ export const createTranspilerConfig = (props?: ICreateTranspilerConfigProps): ts
               );
             }
 
-            // this (standalone) → id
+            // this (standalone) → self
             if (node.kind === ts.SyntaxKind.ThisKeyword) {
-              return ts.factory.createIdentifier("id");
+              return ts.factory.createIdentifier("self");
             }
 
             if (

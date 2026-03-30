@@ -25,12 +25,12 @@ Here is an example of how to create an object which can be moved on the map usin
 
 ```typescript
 class Player extends GMObject {
-  movment_speed: number;
+  _movement_speed: number;
 
   // inside of the defineObject you can declare all of your events, like onCreate, onStep, onDraw etc...
   onCreate() {
     // use "this." keyword to access object properties in a safe fully typed way
-    this.movement_speed = 2;
+    this._movement_speed = 2;
   }
 
   onStep() {
@@ -39,10 +39,8 @@ class Player extends GMObject {
 
     if (_hspd != 0 || _vspd != 0) {
         var _dir = point_direction(0, 0, _hspd, _vspd);
-        var _xadd = lengthdir_x(this.movement_speed, _dir);
-        var _yadd = lengthdir_y(this.movement_speed, _dir);
-        this.x = this.x + _xadd;
-        this.y = this.y + _yadd;
+        this.x = this.x + lengthdir_x(this._movement_speed, _dir);
+        this.y = this.y + lengthdir_y(this._movement_speed, _dir);
     }
   }
 }
@@ -53,14 +51,14 @@ You can also extend other object and use inheritance:
 ```typescript
 // obj_base/code.ts
 class Base extends GMObject {
-  movement_speed: number;
+  _movement_speed: number;
 
   move (in_h: number, in_v: number) {
     // in_h and in_v are compued by obj_base, here we receive result and make player move using movement_speed
     if (in_h != 0 || in_v != 0) {
       this.sprite_index = spr_player_move;
-      this.x += this.movement_speed * in_h;
-      this.y += this.movement_speed * in_v;
+      this.x += this._movement_speed * in_h;
+      this.y += this._movement_speed * in_v;
 
       if (in_h > 0) {
         this.image_xscale = 1;
@@ -76,7 +74,7 @@ class Base extends GMObject {
 // obj_player/code.ts
 class Player extends Base {
   onCreate(): void {
-    this.movement_speed = 2;
+    this._movement_speed = 2;
   }
 
   onStep (): void {
@@ -100,7 +98,7 @@ It is also possible to create a script (filename: `scripts/scr_player/code.ts`):
 // you can fully type arguments, in this case we tell that obj is IPlayer, so only IPlayer can be passed here
 function increase_player_speed (obj: Player) {
   // here you have full autocomplete for player object, plus, if you try to pass something that is not IPlayer, the code editor will tell you about your mistake
-  obj.movement_speed += 2;
+  obj._movement_speed += 2;
 }
 
 ```

@@ -6,15 +6,20 @@ exports[`processObjectFile() > obj_example_1 1`] = `
   "extendedClassName": "GMObject",
   "scripts": [
     {
-      "code": "var _xx = x;
-var _yy = y - 40;
-var x = x;
+      "code": "move_player(self); // move_player is external script
+",
+      "scriptName": "onStep",
+    },
+    {
+      "code": "var _xx = self.x;
+var _yy = self.y - 40;
+var x = self.x;
 // Draw Shadow
 draw_set_color(c_black);
-draw_text(_xx + 2, _yy + 2, name);
+draw_text(_xx + 2, _yy + 2, self.name);
 // Draw Main Text
 draw_set_color(c_white);
-draw_text(_xx, _yy, name);
+draw_text(_xx, _yy, self.name);
 ",
       "scriptName": "onDrawGui",
     },
@@ -34,7 +39,7 @@ exports[`processObjectFile() > should correctly parse a class name and its metho
     {
       "code": "event_inherited();
 
-movement_speed = 3;
+self.movement_speed = 3;
 ",
       "scriptName": "onCreate",
     },
@@ -64,7 +69,7 @@ say_hi = function () {
 
 __super_Player_mind_own_biz = mind_own_biz;
 mind_own_biz = function () {
-    sprite_index = spr_mind_own_biz;
+    self.sprite_index = spr_mind_own_biz;
 };
 ",
       "scriptName": "onCreate",
@@ -82,12 +87,12 @@ exports[`processObjectFile() > should handle methods within a class 1`] = `
       "code": "event_inherited();
 // Object methods from TestObject
 changeSpeed = function (speed) {
-    movement_speed = speed;
+    self.movement_speed = speed;
 };
 
 // End object methods
 
-movement_speed = 3;
+self.movement_speed = 3;
 ",
       "scriptName": "onCreate",
     },
@@ -104,7 +109,7 @@ exports[`processObjectFile() > should handle methods within a class without onCr
       "code": "event_inherited();
 
 changeSpeed = function (speed) {
-    movement_speed = speed;
+    self.movement_speed = speed;
 };
 ",
       "scriptName": "onCreate",
