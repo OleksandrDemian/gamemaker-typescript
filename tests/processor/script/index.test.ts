@@ -38,4 +38,14 @@ describe('processScriptFile()', () => {
     const result = processExampleScrFile("scr_generic_tests");
     expect(result).toMatchSnapshot();
   });
+
+  it('should correctly parse a script with a class', async () => {
+    const result = processExampleScrFile("scr_class");
+    expect(result).toMatchSnapshot();
+  });
+
+  it('should correctly parse a script with a class and inheritance', async () => {
+    const result = processExampleScrFile("scr_class_inheritance");
+    expect(result).toMatchSnapshot();
+  });
 });
