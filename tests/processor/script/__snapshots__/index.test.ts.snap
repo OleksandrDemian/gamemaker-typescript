@@ -51,6 +51,82 @@ function test4() {
 }
 `;
 
+exports[`processScriptFile() > should correctly parse a script with a class 1`] = `
+{
+  "code": "function Player(_name) constructor {
+    self.name = _name;
+    static sayHi = function () {
+        show_debug_message(self.name);
+    };
+}
+function PlayerMultipleArgs(_name, _num) constructor {
+    self.name = _name;
+    static sayHi = function () {
+        show_debug_message(self.name);
+    };
+}
+function PlayerNoArgs() constructor {
+    static sayHi = function () {
+        show_debug_message("Hi!");
+    };
+}
+function PlayerNoArgsTwo() constructor {
+    static sayHi = function (name) {
+        show_debug_message("Hi " + name);
+    };
+}
+function PlayerNoArgsThree() constructor {
+    self.name = "Ciaone";
+    static sayHi = function () {
+        show_debug_message("Hi " + self.name);
+    };
+}
+",
+}
+`;
+
+exports[`processScriptFile() > should correctly parse a script with a class and inheritance 1`] = `
+{
+  "code": "function Entity(_name) constructor {
+    self.name = _name;
+    static sayHi = function () {
+        show_debug_message(self.name);
+    };
+}
+function Player(name) : Entity(name) constructor {
+    static __super_Player_sayHi = sayHi;
+    static sayHi = function () {
+        __super_Player_sayHi();
+        show_debug_message("Override sayHi");
+    };
+}
+function EntityTwo() constructor {
+    static sayHi = function (_name) {
+        show_debug_message(_name);
+    };
+}
+function PlayerTwo(_name) : EntityTwo() constructor {
+    self.name = _name;
+    static __super_PlayerTwo_sayHi = sayHi;
+    static sayHi = function () {
+        __super_PlayerTwo_sayHi(self.name);
+    };
+}
+function EntityThree() constructor {
+    static sayHi = function (_name) {
+        show_debug_message(_name);
+    };
+}
+function PlayerThree() : EntityThree() constructor {
+    static __super_PlayerThree_sayHi = sayHi;
+    static sayHi = function (name) {
+        __super_PlayerThree_sayHi(string_upper(name));
+    };
+}
+",
+}
+`;
+
 exports[`processScriptFile() > should correctly parse a script with const and let declarations 1`] = `
 {
   "code": "// @ts-nocheck

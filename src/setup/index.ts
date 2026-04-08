@@ -40,6 +40,10 @@ const setupExtension = (props: ISetupProjectProps) => {
     path.join(props.librarySourceRoot, "gamemaker-config", "extensions", "files", "pre_project_step.bat"),
     path.join(props.currentFolder, "extensions", extName, "pre_project_step.bat")
   );
+  fs.copyFileSync(
+    path.join(props.librarySourceRoot, "gamemaker-config", "extensions", "files", "pre_project_step.sh"),
+    path.join(props.currentFolder, "extensions", extName, "pre_project_step.sh")
+  );
 
   projectHandler.addFolder(DEFAULT_EXTENSIONS_FOLDER);
   projectHandler.addResource(extName, metaFilePath);

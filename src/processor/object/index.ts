@@ -1,6 +1,6 @@
 import ts from "typescript";
 import {eventByHandler, OnCreateHandler} from "../../events";
-import {createTranspilerConfig} from "../../config/transpiler";
+import {createObjectTranspilerConfig} from "../../config/transpiler";
 import {readFileSync} from "../../utils/files";
 
 interface ICollectedObject {
@@ -56,7 +56,7 @@ export function processObjectFile(filePath: string): ICollectedObject | null {
       if (!ts.isMethodDeclaration(member) || !ts.isIdentifier(member.name)) continue;
 
       const methodName = member.name.text;
-      const transpilerConfig = createTranspilerConfig({
+      const transpilerConfig = createObjectTranspilerConfig({
         className: result.className,
       });
 
