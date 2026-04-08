@@ -10,6 +10,8 @@ export const createObjectTranspilerConfig = (props?: ICreateObjectTranspilerConf
     compilerOptions: {
       target: ts.ScriptTarget.ES2015,
       module: ts.ModuleKind.CommonJS,
+      alwaysStrict: false,
+      strict: false,
     },
     transformers: {
       before: [
@@ -103,6 +105,8 @@ export const createScriptTranspilerConfig = (): ts.TranspileOptions => {
     compilerOptions: {
       target: ts.ScriptTarget.ES2015,
       module: ts.ModuleKind.CommonJS,
+      alwaysStrict: false,
+      strict: false,
     },
     transformers: {
       before: [

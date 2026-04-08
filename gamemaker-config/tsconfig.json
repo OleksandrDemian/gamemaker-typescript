@@ -5,6 +5,9 @@
     "rootDir": ".",
     "typeRoots": [
       ".ts"
-    ]
+    ],
+    "types": ["static"],
+    "strictPropertyInitialization": false,
+    "preserveConstEnums": false
   }
 }
