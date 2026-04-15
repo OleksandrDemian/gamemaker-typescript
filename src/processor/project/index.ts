@@ -1,26 +1,26 @@
-import {createProjectHandler, IProjectHandler} from "../../handler/project";
+import {IProjectHandler} from "../../handler/project";
 import {IProjectResource} from "../../entities/project";
 import fs from "fs-extra";
 import path from "node:path";
 
-const generateSpritesTypes = (sprites: IProjectResource[]): string => {
-  return sprites.reduce((acc, res) => acc + `declare const ${res.id.name}: Id.SpriteElement;\n`, '');
+const generateSpritesTypes = (sp: IProjectResource[]): string => {
+  return sp.reduce((acc, res) => acc + `declare const ${res.id.name}: Id.SpriteElement;\n`, '');
 };
 
-const generateSoundTypes = (sounds: IProjectResource[]): string => {
-  return sounds.reduce((acc, res) => acc + `declare const ${res.id.name}: Id.Sound;\n`, '');
+const generateSoundTypes = (sn: IProjectResource[]): string => {
+  return sn.reduce((acc, res) => acc + `declare const ${res.id.name}: Id.Sound;\n`, '');
 };
 
-const generateRoomsTypes = (sounds: IProjectResource[]): string => {
-  return sounds.reduce((acc, res) => acc + `declare const ${res.id.name}: Asset.GMRoom;\n`, '');
+const generateRoomsTypes = (rm: IProjectResource[]): string => {
+  return rm.reduce((acc, res) => acc + `declare const ${res.id.name}: Asset.GMRoom;\n`, '');
 };
 
-const generateObjectsTypes = (sounds: IProjectResource[], customClasses: Map<string, string>): string => {
-  return sounds.reduce((acc, res) => acc + `declare const ${res.id.name}: ${customClasses.get(res.id.name) || 'any'};\n`, '');
+const generateObjectsTypes = (obj: IProjectResource[], customClasses: Map<string, string>): string => {
+  return obj.reduce((acc, res) => acc + `declare const ${res.id.name}: ${customClasses.get(res.id.name) || 'GMObject'};\n`, '');
 };
 
-const generateTilesetTypes = (sounds: IProjectResource[]): string => {
-  return sounds.reduce((acc, res) => acc + `declare const ${res.id.name}: Asset.GMTileSet;\n`, '');
+const generateTilesetTypes = (ts: IProjectResource[]): string => {
+  return ts.reduce((acc, res) => acc + `declare const ${res.id.name}: Asset.GMTileSet;\n`, '');
 };
 
 export const writeTypesFile = (filename: string, file: string) => {

@@ -1912,7 +1912,7 @@ declare function instance_deactivate_region(left?: Real,top?: Real,width?: Real,
  * @returns {Bool}
  * @param {Asset.GMObject} obj - The index of the object to check.
  */
-declare function object_exists(obj?: GMObject): Bool;
+declare function object_exists(obj?: GMObject): obj is GMObject;
 
 /**
  * This function will tell you whether the object you are checking has a mask index or not, and if it does then it will return the index of that mask, or -1 if it does not. Please note that this is not an instance function! You can have an object with no mask while an instance of that same object can have one and vice-versa, or they can even have different masks. You can set an individual instances mask index using the mask_index instance variable.
@@ -4826,7 +4826,7 @@ declare function sprite_duplicate(index?: GMSprite): GMSprite;
  * @returns {Bool}
  * @param {Asset.GMSprite} index - The index of the sprite to check.
  */
-declare function sprite_exists(index?: GMSprite): Bool;
+declare function sprite_exists(index?: GMSprite): index is GMSprite;
 
 /**
  * With this function you can remove the given texture page for the given sprite from texture memory. You supply the sprite index (as defined when creating the sprite resource) and the texture page it is assigned to will be removed from texture memory. Note that if the texture page is used elsewhere in the room (by another instance sprite or a background, etc...) you may get a minor performance hit as the page is immediately reloaded, so care should be taken when using this function. Note that the function will return -1 if flush is not supported for the chosen resource, or it will return 0 if all worked correctly.
@@ -5023,7 +5023,7 @@ declare function timeline_delete(ind?: GMTimeline): Undefined;
  * @returns {Bool}
  * @param {Asset.GMTimeline} ind - The index of the time line to check for.
  */
-declare function timeline_exists(ind?: GMTimeline): Bool;
+declare function timeline_exists(ind?: GMTimeline): ind is GMTimeline;
 
 /**
  * This function can be used to get the name of a time line as a string. if the time line has been created dynamically using the timeline_add() function, the name returned will have the format "__newtimelineN" where "N" is the number of the time line (starting from 0). Please note that this is only a string and cannot be used to reference the timeline directly - for that you would need the timeline index. You can, however, use this string to get the timeline index using the returned string along with the function asset_get_index().
@@ -5318,7 +5318,7 @@ declare function buffer_delete(buffer?: Buffer): Undefined;
  * @returns {Bool}
  * @param {Id.Buffer} buffer - The index of the buffer to check.
  */
-declare function buffer_exists(buffer?: Buffer): Bool;
+declare function buffer_exists(buffer?: Buffer): buffer is Buffer;
 
 /**
  * This function can be used to fill a previously created buffer with a given data type and value. The data you fill the buffer with must be in agreement with the "type" argument of this function, meaning that you can't try to fill with a string and use the unsigned 16bit integer type, for example. The type constants are the same as those used by the buffer_read() and buffer_write() functions. The "size" is the size of the buffer (in bytes) that you wish to fill, while the offset is the offset value (also in bytes) from the start of the buffer to start the fill from.
@@ -7535,13 +7535,13 @@ declare function is_debug_overlay_open(): Bool;
  * Returns true if the mouse is over a debug overlay window or gadget, or is being used by the debug sub-systems (i.e. for dragging)
  * @returns {Bool}
  */
-declare function is_mouse_over_debug_overlay(): Bool;
+declare function is_mouse_over_debug_overlay(): BoolNumber;
 
 /**
  * Returns true if the keyboard is being used by the debug overlay system
  * @returns {Bool}
  */
-declare function is_keyboard_used_debug_overlay(): Bool;
+declare function is_keyboard_used_debug_overlay(): BoolNumber;
 
 /**
  * This function can be used to switch on and off the standard debug log and console when testing your game and is disabled by default.
@@ -11377,7 +11377,7 @@ declare function device_is_keypad_open(): Bool;
  * @param {Real} device - The device (from 0 - n) that is being checked
  * @param {Constant.MouseButton} button - The button of the device that is being checked.
  */
-declare function device_mouse_check_button(device?: Real,button?: MouseButton): Bool;
+declare function device_mouse_check_button(device?: Real,button?: MouseButton): BoolNumber;
 
 /**
  * This function returns true or false depending on whether the device that you specify has been "touched" (clicked) or not. The device argument refers to the touch number, which can be from 0 to n and the maximum number of touches that can be detected will depend very much on the device being used and the OS it runs (most devices will support at least 4 simultaneous touches). This function is only triggered once by the actual pressing action, and the constants listed on this page can be used to check for the mouse buttons. Note that mb_right will only be detected if a double tap touch is detected and held on the second tap (this behavior can be disabled using the function device_mouse_dbclick_enable()).
@@ -11385,7 +11385,7 @@ declare function device_mouse_check_button(device?: Real,button?: MouseButton): 
  * @param {Real} device - The device (from 0 - n) that is being checked.
  * @param {Constant.MouseButton} button - The button of the device that is being checked.
  */
-declare function device_mouse_check_button_pressed(device?: Real,button?: MouseButton): Bool;
+declare function device_mouse_check_button_pressed(device?: Real,button?: MouseButton): BoolNumber;
 
 /**
  * This function returns true or false depending on whether the device touch that you specify has been released or not. The device argument refers to the device touch number, which can be from 0 to n and note that the maximum number of touches that can be detected will depend very much on the device being used and the OS it runs (most devices will support at least 4 simultaneous touches). This function is only triggered once by the actual releasing action, and the constants listed on this page can be used to check for the mouse buttons. Note that mb_right will only have been detected if a double tap touch is detected and held on the second tap before release (this behavior can be disabled using the function device_mouse_dbclick_enable()).
@@ -11393,14 +11393,14 @@ declare function device_mouse_check_button_pressed(device?: Real,button?: MouseB
  * @param {Real} device - The device (from 0 - n) that is being checked.
  * @param {Constant.MouseButton} button - The button of the device that is being checked.
  */
-declare function device_mouse_check_button_released(device?: Real,button?: MouseButton): Bool;
+declare function device_mouse_check_button_released(device?: Real,button?: MouseButton): BoolNumber;
 
 /**
  * This function can be used to set the device to detect a double tap of the mb_left (left mouse button) as an mb_right (right mouse button) tap or not. By default this is set to true, meaning that every time the user taps the device screen twice quickly and consecutively, the return value is the same as if the right mouse button had been clicked. When this is on, the first tap will be detected as mb_left, and the second as mb_right, so make sure that any code you use takes this into account.
  * @returns {Bool}
  * @param {Bool} bool - Set double-click detection on (true) or off (false).
  */
-declare function device_mouse_dbclick_enable(bool?: Bool): Bool;
+declare function device_mouse_dbclick_enable(bool?: Bool): BoolNumber;
 
 /**
  * This function returns the raw x position of a touch on the device. What this means is that it returns the actual device definition of the x position that is being touched, not the GameMaker one, and as such will ignore things like view position and scaling. Note that the maximum number of touches that can be detected will depend very much on the device being used and the OS it runs
@@ -11471,7 +11471,7 @@ declare function gamepad_axis_value(device?: Real,axisindex?: GamepadAxis): Real
  * @param {Real} device - Which gamepad device "slot" to check.
  * @param {Constant.GamepadButton} button - Which gamepad button constant to check for.
  */
-declare function gamepad_button_check(device?: Real,button?: GamepadButton): Bool;
+declare function gamepad_button_check(device?: Real,button?: GamepadButton): BoolNumber;
 
 /**
  * This function will return true or false depending on whether the given gamepad button is detected as having been pressed or not. Note that this function will only trigger once for the button the first time it is pressed. For it to trigger again the button must first be released and then re-pressed. If you need to check a continuous press of the button you should be using the function gamepad_button_check().
@@ -11479,7 +11479,7 @@ declare function gamepad_button_check(device?: Real,button?: GamepadButton): Boo
  * @param {Real} device - Which gamepad device "slot" to check.
  * @param {Constant.GamepadButton} button - Which gamepad button constant to check for.
  */
-declare function gamepad_button_check_pressed(device?: Real,button?: GamepadButton): Bool;
+declare function gamepad_button_check_pressed(device?: Real,button?: GamepadButton): BoolNumber;
 
 /**
  * This function will return true or false depending on whether the given gamepad button is detected as having been released or not. Note that this function will only trigger once for the button the moment it has been released. For it to trigger again the button must first be pressed and then released once more. If you are checking an analogue button, then the check will take into consideration the threshold setting and only return true when the raw input value goes under the given threshold (you can get this raw value using the function gamepad_button_value()).
@@ -11487,7 +11487,7 @@ declare function gamepad_button_check_pressed(device?: Real,button?: GamepadButt
  * @param {Real} device - Which gamepad device "slot" to check.
  * @param {Constant.GamepadButton} button - Which gamepad button constant to check for.
  */
-declare function gamepad_button_check_released(device?: Real,button?: GamepadButton): Bool;
+declare function gamepad_button_check_released(device?: Real,button?: GamepadButton): BoolNumber;
 
 /**
  * This function will return the total number of buttons available for the gamepad connected to the given device "slot".
@@ -11786,28 +11786,28 @@ declare function io_clear(): Undefined;
  * @returns {Bool}
  * @param {Any} key - The key to check the down state of.
  */
-declare function keyboard_check(key?: Any): Bool;
+declare function keyboard_check(key?: Any): BoolNumber;
 
 /**
  * This function will return true if the key with the particular keycode is pressed, or false if it is not, by checking the hardware directly. It allows for a few more checks, in particular you can use keycodes vk_lshift, vk_lcontrol, vk_lalt, vk_rshift, vk_rcontrol and vk_ralt to check whether the left or right shift, control or alt key is pressed. The function will take a keycode value as returned by the function ord() (only capital letters from A-Z or numbers from 0-9), or any of the vk_* constants listed on the main Keyboard Input page.
  * @returns {Bool}
  * @param {Any} key - The key to check the down state of.
  */
-declare function keyboard_check_direct(key?: Any): Bool;
+declare function keyboard_check_direct(key?: Any): BoolNumber;
 
 /**
  * With this function you can check to see if a key has been pressed or not. Unlike the keyboard_check() function, this function will only run once for every time the key is pressed down, so for it to trigger again, the key must be first released and then pressed again. The function will take a keycode value as returned by the function ord() (only capital letters from A-Z or numbers from 0-9), or any of the vk_* constants listed on the main Keyboard Input page.
  * @returns {Bool}
  * @param {Any} key - The key to check the pressed state of.
  */
-declare function keyboard_check_pressed(key?: Any): Bool;
+declare function keyboard_check_pressed(key?: Any): BoolNumber;
 
 /**
  * With this function you can check to see if a key has been released or not. Unlike the keyboard_check() function, this function will only run once for every time the key is lifted, so for it to trigger again, the key must be first pressed and then released again. The function will take a keycode value as returned by the function ord() (only capital letters from A-Z or numbers from 0-9), or any of the vk_* constants listed on the main Keyboard Input page.
  * @returns {Bool}
  * @param {Any} key - The key to check the released state of.
  */
-declare function keyboard_check_released(key?: Any): Bool;
+declare function keyboard_check_released(key?: Any): BoolNumber;
 
 /**
  * With this function you can clear the current keyboard state, which essentially means that if the key is being held down, it will no longer be recognised until it is released again (which won't trigger the Keyboard Key Released event either on this occasion) and pressed again. The function will take a keycode value as returned by the function ord() (only capital letters from A-Z or numbers from 0-9), or any of the vk_* constants listed on the main Keyboard Input page.
@@ -11827,7 +11827,7 @@ declare function keyboard_get_map(key?: Any): Real;
  * You can use this function to find the status of the keypad number lock with true being returned for on, and false returned for off.
  * @returns {Bool}
  */
-declare function keyboard_get_numlock(): Bool;
+declare function keyboard_get_numlock(): BoolNumber;
 
 /**
  * With this function you can simulate the press of any key on the keyboard. When used, the key will be flagged as being pressed until the corresponding release function is called (see keyboard_key_release()). The function will take a keycode value as returned by the function ord() (only capital letters from A-Z or numbers from 0-9), or any of the vk_* constants listed on the main Keyboard Input page.
@@ -11869,21 +11869,21 @@ declare function keyboard_unset_map(): Undefined;
  * @returns {Bool}
  * @param {Constant.MouseButton} numb - Which mouse button constant to check for.
  */
-declare function mouse_check_button(numb?: MouseButton): Bool;
+declare function mouse_check_button(numb?: MouseButton): BoolNumber;
 
 /**
  * This function will return true if the mouse button being checked has been pressed or false if it has not. This function will only be triggered once for any mouse button when it is first pressed and to trigger it again the button will need to have been released and pressed again. Note that it will be considered triggered for the duration of the step, and for all instances that have any mouse events or that use this same function.
  * @returns {Bool}
  * @param {Constant.MouseButton} numb - Which mouse button constant to check for.
  */
-declare function mouse_check_button_pressed(numb?: MouseButton): Bool;
+declare function mouse_check_button_pressed(numb?: MouseButton): BoolNumber;
 
 /**
  * This function will return true if the mouse button being checked has been released or false if it has not. This function will only be triggered once for any mouse button when it is released and to trigger it again the button will need to have been pressed and released again. You supply the mouse button to check from one of the following constants:
  * @returns {Bool}
  * @param {Constant.MouseButton} numb - Which mouse button constant to check for.
  */
-declare function mouse_check_button_released(numb?: MouseButton): Bool;
+declare function mouse_check_button_released(numb?: MouseButton): BoolNumber;
 
 /**
  * This function will clear the current state of the given mouse button. This means that checks for it being held down will not return true until the player releases the button and presses it again (but the release state will still be detected if the clear is done while the mouse button is being held down).
@@ -11896,13 +11896,13 @@ declare function mouse_clear(button?: MouseButton): Bool;
  * This function returns true if the mouse wheel is being rotated downwards and false otherwise.
  * @returns {Bool}
  */
-declare function mouse_wheel_down(): Bool;
+declare function mouse_wheel_down(): BoolNumber;
 
 /**
  * This function returns true if the mouse wheel is being rotated upwards and false otherwise.
  * @returns {Bool}
  */
-declare function mouse_wheel_up(): Bool;
+declare function mouse_wheel_up(): BoolNumber;
 
 /**
  * This function will return the current height in pixels of the virtual keyboard, based on the size of the display. If the keyboard is not visible, 0 will be returned.
@@ -15533,7 +15533,7 @@ declare function bool(n?: Any): Bool;
  * @param {Struct} struct - The struct reference to check.
  * @param {Any} constructor_name - The constructor reference to check against
  */
-declare function is_instanceof(struct?: Struct,constructor_name?: Any): Bool;
+declare function is_instanceof<T>(struct?: Struct,constructor_name?: T): struct is T;
 
 /**
  * returns the static struct for the given struct or function / script, returns undefined if no static struct is set.
@@ -15562,14 +15562,14 @@ declare function int64(val?: Any): Real;
  * @returns {Bool}
  * @param {Any} n - The variable to check.
  */
-declare function is_array(n?: Any): Bool;
+declare function is_array(n?: Any): n is Array;
 
 /**
  * This function returns whether a given variable is a boolean (true ior false) or not. In some cases you want to check and see if a variable in GameMaker holds a boolean value, and that's when you would use this function.
  * @returns {Bool}
  * @param {Any} n - The argument to check.
  */
-declare function is_bool(n?: Any): Bool;
+declare function is_bool(n?: Any): n is boolean;
 
 /**
  * This function returns whether a given variable can be called (either beeing a method or a valid function index).
@@ -15597,14 +15597,14 @@ declare function is_infinity(n?: Any): Bool;
  * @returns {Bool}
  * @param {Any} n - The argument to check.
  */
-declare function is_int32(n?: Any): Bool;
+declare function is_int32(n?: Any): n is number;
 
 /**
  * This function returns whether a given variable is a 64bit integer or not. In some cases you want to check and see what data type a variable holds in GameMaker and that's when you would use this function. It returns true or false depending on whether the value is an int64 or not.
  * @returns {Bool}
  * @param {Any} n - The argument to check.
  */
-declare function is_int64(n?: Any): Bool;
+declare function is_int64(n?: Any): n is number;
 
 /**
  * This function can be used to check and see if a variable is a method variable (it will return true) or not (in which case it will return false).
@@ -15625,7 +15625,7 @@ declare function is_nan(n?: Any): Bool;
  * @returns {Bool}
  * @param {Any} n - The input to check.
  */
-declare function is_numeric(n?: Any): Bool;
+declare function is_numeric(n?: Any): n is number;
 
 /**
  * This function returns whether a given variable is a pointer or not. In some cases you want to check and see what data type a variable holds in GameMaker and that's when you would use this function. It returns true or false depending on whether the value is a pointer or not.
@@ -15639,28 +15639,28 @@ declare function is_ptr(n?: Any): Bool;
  * @returns {Bool}
  * @param {Any} n - The argument to check.
  */
-declare function is_real(n?: Any): Bool;
+declare function is_real(n?: Any): n is number;
 
 /**
  * This function returns whether a given variable is a string number or not. In some cases you want to check and see if a variable in GameMaker holds a string and not a real and that's when you would use this function. It does not return the string but rather true or false, so a value of, for example, "fish" for n will return true, but a value of 200 for n will return false.
  * @returns {Bool}
  * @param {Any} n - The argument to check.
  */
-declare function is_string(n?: Any): Bool;
+declare function is_string(n?: Any): n is string;
 
 /**
  * This function checks if the supplied value is a struct. It returns true if it is, otherwise it returns false.
  * @returns {Bool}
  * @param {Any} val - The value to check.
  */
-declare function is_struct(val?: Any): Bool;
+declare function is_struct(val?: Any): n is object;
 
 /**
  * This function returns whether a given variable is defined or not. In some cases you want to check and see what data type a variable holds in GameMaker and that's when you would use this function. It returns true or false depending on whether the value is defined or not.
  * @returns {Bool}
  * @param {Any} n - The argument to check.
  */
-declare function is_undefined(n?: Any): Bool;
+declare function is_undefined(n?: Any): n is undefined;
 
 /**
  * returns the argument as a string, resolved at compile time.
