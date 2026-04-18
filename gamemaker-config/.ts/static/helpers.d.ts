@@ -1,6 +1,6 @@
 declare type Real = number;
 declare type Bool = boolean;
-declare type BoolNumber = boolean;
+declare type BoolNumber = 0 | 1;
 // @ts-ignore
 declare type String = string;
 declare type Any = any;
