@@ -3,6 +3,7 @@
 exports[`processObjectFile() > obj_example_1 1`] = `
 {
   "className": "Base",
+  "collisionScripts": [],
   "extendedClassName": "GMObject",
   "scripts": [
     {
@@ -31,9 +32,41 @@ draw_text(_xx, _yy, self.name);
 }
 `;
 
+exports[`processObjectFile() > should collect collision event handlers separately 1`] = `
+{
+  "className": "CollisionObject",
+  "collisionScripts": [
+    {
+      "code": "instance_destroy();
+",
+      "scriptName": "onCollision_obj_enemy",
+      "targetObjectName": "obj_enemy",
+    },
+    {
+      "code": "event_inherited();
+self.hitCount += 1;
+",
+      "scriptName": "onCollision_obj_pickup",
+      "targetObjectName": "obj_pickup",
+    },
+  ],
+  "extendedClassName": "GMObject",
+  "scripts": [
+    {
+      "code": "event_inherited();
+
+self.hitCount = 0;
+",
+      "scriptName": "onCreate",
+    },
+  ],
+}
+`;
+
 exports[`processObjectFile() > should correctly parse a class name and its methods into scripts 1`] = `
 {
   "className": "TestObject",
+  "collisionScripts": [],
   "extendedClassName": "GMObject",
   "scripts": [
     {
@@ -50,6 +83,7 @@ self.movement_speed = 3;
 exports[`processObjectFile() > should handle methods inheritance when extending 1`] = `
 {
   "className": "Player",
+  "collisionScripts": [],
   "extendedClassName": "Entity",
   "scripts": [
     {
@@ -81,6 +115,7 @@ mind_own_biz = function () {
 exports[`processObjectFile() > should handle methods within a class 1`] = `
 {
   "className": "TestObject",
+  "collisionScripts": [],
   "extendedClassName": "GMObject",
   "scripts": [
     {
@@ -103,6 +138,7 @@ self.movement_speed = 3;
 exports[`processObjectFile() > should handle methods within a class without onCreate event 1`] = `
 {
   "className": "TestObject",
+  "collisionScripts": [],
   "extendedClassName": "GMObject",
   "scripts": [
     {

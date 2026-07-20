@@ -1,13 +1,21 @@
 import ts from "typescript";
-import {eventByHandler, OnCreateHandler} from "../../events";
+import {
+  eventByHandler,
+  getCollisionTargetName,
+  isCollisionHandler,
+  OnCreateHandler,
+} from "../../events";
 import {createObjectTranspilerConfig} from "../../config/transpiler";
 import {readFileSync} from "../../utils/files";
 
 interface ICollectedObject {
   scripts: { scriptName: string; code: string }[];
+  collisionScripts: { scriptName: string; targetObjectName: string; code: string }[];
   className: string;
   extendedClassName?: string;
 }
+
+type ObjectResourceId = { name: string; path: string };
 
 const getExtendedClass = (statement: ts.ClassDeclaration) => {
   if (statement.heritageClauses) {
@@ -28,7 +36,10 @@ const getExtendedClass = (statement: ts.ClassDeclaration) => {
   return undefined;
 }
 
-export function processObjectFile(filePath: string): ICollectedObject | null {
+export function processObjectFile(
+  filePath: string,
+  resolveObjectResource?: (name: string) => ObjectResourceId | undefined,
+): ICollectedObject | null {
   const sourceCode = readFileSync(filePath);
   const sourceFile = ts.createSourceFile(
     "temp.ts",
@@ -39,6 +50,7 @@ export function processObjectFile(filePath: string): ICollectedObject | null {
 
   const result: ICollectedObject = {
     scripts: [],
+    collisionScripts: [],
     className: '',
     extendedClassName: '',
   };
@@ -65,7 +77,20 @@ export function processObjectFile(filePath: string): ICollectedObject | null {
         .map((s) => printer.printNode(ts.EmitHint.Unspecified, s, sourceFile))
         .join("\n");
 
-      if (eventByHandler.has(methodName)) {
+      if (isCollisionHandler(methodName)) {
+        const targetObjectName = getCollisionTargetName(methodName);
+        if (resolveObjectResource && !resolveObjectResource(targetObjectName)) {
+          throw new Error(
+            `Unable to resolve collision target object "${targetObjectName}" for handler "${methodName}".`,
+          );
+        }
+
+        result.collisionScripts.push({
+          scriptName: methodName,
+          targetObjectName,
+          code: ts.transpileModule(bodyCode, transpilerConfig).outputText,
+        });
+      } else if (eventByHandler.has(methodName)) {
         result.scripts.push({
           scriptName: methodName,
           code: ts.transpileModule(bodyCode, transpilerConfig).outputText,

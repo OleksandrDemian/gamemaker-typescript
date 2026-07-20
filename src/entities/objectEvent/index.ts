@@ -1,6 +1,7 @@
 export interface IGenerateObjectEventProps {
   eventNum: number;
   eventType: number;
+  collisionObjectId?: { name: string; path: string } | null;
 }
 
 export interface IObjectEvent {
@@ -19,7 +20,7 @@ export const createObjectEvent = (props: IGenerateObjectEventProps): IObjectEven
   return {
     "$GMEvent":"v1",
     "%Name":"",
-    collisionObjectId: null,
+    collisionObjectId: props.collisionObjectId ?? null,
     eventNum: props.eventNum,
     eventType: props.eventType,
     isDnD: false,

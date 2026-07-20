@@ -31,18 +31,6 @@ const compile = () => {
   console.timeEnd("Compile project");
 };
 
-// const watch = () => {
-//   // Watch files
-//   console.log("Watching for files");
-//   chokidar
-//     .watch("./", {
-//       // ignoreInitial: true, skip files when starting the service
-//       /// todo: ignore useless files
-//     })
-//     .on("add", compileSingleFile)
-//     .on("change", compileSingleFile);
-// };
-
 const health = () => {
   console.log("Looks healthy");
 };

@@ -34,6 +34,18 @@ describe('processObjectFile()', () => {
     expect(result).toMatchSnapshot();
   });
 
+  it('should collect collision event handlers separately', () => {
+    const result = processExampleObjFile("obj_w_collision");
+    expect(result).toMatchSnapshot();
+  });
+
+  it('should reject collision handlers for unknown target objects', () => {
+    const filePath = path.join(__dirname, "examples", "obj_w_collision.ts");
+
+    expect(() => processObjectFile(filePath, () => undefined))
+      .toThrowError(/obj_enemy/);
+  });
+
   it('obj_example_1', async () => {
     const result = processExampleObjFile("obj_example_1");
     expect(result).toMatchSnapshot();

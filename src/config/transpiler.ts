@@ -1,5 +1,5 @@
 import ts from "typescript";
-import {eventByHandler} from "../events";
+import {eventByHandler, isCollisionHandler} from "../events";
 
 export interface ICreateObjectTranspilerConfigProps {
   className?: string;
@@ -64,7 +64,7 @@ export const createObjectTranspilerConfig = (props?: ICreateObjectTranspilerConf
               node.expression.kind === ts.SyntaxKind.SuperKeyword
             ) {
               const methodName = node.name.text;
-              if (eventByHandler.has(methodName)) {
+              if (eventByHandler.has(methodName) || isCollisionHandler(methodName)) {
                 return ts.factory.createIdentifier(`event_inherited`);
               } else {
                 return ts.factory.createIdentifier(`__super_${props?.className}_${methodName}`);

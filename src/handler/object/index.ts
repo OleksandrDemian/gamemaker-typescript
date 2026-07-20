@@ -4,7 +4,7 @@ import {IProjectHandler} from "../project";
 import {IObject} from "../../entities/object";
 import js5 from "json5";
 import {createObjectEvent} from "../../entities/objectEvent";
-import {eventByHandler} from "../../events";
+import {EventTypes, eventByHandler} from "../../events";
 import {processObjectFile} from "../../processor/object";
 
 const cleanupObjectFolder = (objectFolder: string) => {
@@ -38,9 +38,12 @@ const findTsFile = (folder: string): string | undefined => {
   return undefined;
 }
 
-const isSameEventsList = (a: IObject["eventList"], b: IObject["eventList"]): boolean => {
-  const aEvents = new Set(a.map((e) => e.eventNum + "_" + e.eventType));
-  const bEvents = new Set(b.map((e) => e.eventNum + "_" + e.eventType));
+const eventKey = (event: IObject["eventList"][number]): string =>
+  `${event.eventNum}_${event.eventType}${event.collisionObjectId?.name ? "_" + event.collisionObjectId.name : ""}`;
+
+export const isSameEventsList = (a: IObject["eventList"], b: IObject["eventList"]): boolean => {
+  const aEvents = new Set(a.map(eventKey));
+  const bEvents = new Set(b.map(eventKey));
 
   // 1. Check if they have the same number of unique events
   if (aEvents.size !== bEvents.size) return false;
@@ -79,7 +82,10 @@ export const createObjectHandler = (project: IProjectHandler, name: string): IOb
         return false;
       }
 
-      const processResult = processObjectFile(path.join(folder, tsFile));
+      const processResult = processObjectFile(
+        path.join(folder, tsFile),
+        (targetName) => project.getResource("objects", targetName)?.id,
+      );
 
       if (!processResult) {
         props?.onEmitClass?.(name, "any");
@@ -97,6 +103,26 @@ export const createObjectHandler = (project: IProjectHandler, name: string): IOb
         eventList.push(createObjectEvent({
           eventNum: eventInfo.eventNum,
           eventType: eventInfo.eventType,
+        }));
+      }
+
+      for (const script of processResult.collisionScripts) {
+        const targetResource = project.getResource("objects", script.targetObjectName);
+        if (!targetResource) {
+          throw new Error(
+            `Unable to resolve collision target object "${script.targetObjectName}" for handler "${script.scriptName}".`,
+          );
+        }
+
+        fs.outputFileSync(
+          path.join(folder, `Collision_${script.targetObjectName}.gml`),
+          script.code,
+          "utf8",
+        );
+        eventList.push(createObjectEvent({
+          eventNum: 0,
+          eventType: EventTypes.COLLISION,
+          collisionObjectId: targetResource.id,
         }));
       }
 

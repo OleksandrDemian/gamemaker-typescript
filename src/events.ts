@@ -2,7 +2,7 @@
  * Thanks: https://github.com/bscotch/stitch
  */
 
-const EventTypes = {
+export const EventTypes = {
   CREATE: 0,
   DESTROY: 1,
   ALERT: 2,
@@ -45,6 +45,11 @@ for (let i = 0; i < 10; i++) {
 }
 
 export const OnCreateHandler = "onCreate";
+export const OnCollisionHandlerPrefix = "onCollision_";
+export const isCollisionHandler = (methodName: string): boolean =>
+  methodName.startsWith(OnCollisionHandlerPrefix);
+export const getCollisionTargetName = (methodName: string): string =>
+  methodName.slice(OnCollisionHandlerPrefix.length);
 
 export const objectEvents: IObjectEvent[] = [
   {
